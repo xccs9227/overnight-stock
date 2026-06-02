@@ -421,20 +421,23 @@ async function fetchRealStocks(){
     }));
   }
 
-  async function fetchPage(pn,pz){
-    var url=makeUrl(pn,pz);
+  // Detect which strategy works on page 1, then use same strategy for all pages
+  async function tryAllStrategies(url){
     var encoded=encodeURIComponent(url);
 
-    // Strategy 1: JSONP with multiple callback parameter names
+    // Strategy 1: JSONP
     var cbParams=['cb','callback','jsonpCallback'];
     for(var i=0;i<cbParams.length;i++){
-      try{var d=await fetchJSONP(url,cbParams[i],8000);if(d&&d.data&&d.data.diff)return d}catch(e){}
+      try{var d=await fetchJSONP(url,cbParams[i],8000);if(d&&d.data&&d.data.diff)return{data:d,method:'jsonp'}}catch(e){}
     }
 
-    // Strategy 2: Public CORS proxies
+    // Strategy 2: CORS proxies (rotated)
     var proxies=[
       {url:'https://corsproxy.io/?',parse:function(j){return j.data&&j.data.diff?j:null}},
       {url:'https://api.allorigins.win/raw?url=',parse:function(j){return j.contents?JSON.parse(j.contents):null}},
+      {url:'https://cors.kylehuynh.com/?url=',parse:function(j){return j.data&&j.data.diff?j:null}},
+      {url:'https://cors.eu.org/?',parse:function(j){return j.data&&j.data.diff?j:null}},
+      {url:'https://cors.aeiot.xyz/?',parse:function(j){return j.data&&j.data.diff?j:null}},
     ];
     for(var i=0;i<proxies.length;i++){
       try{
@@ -442,42 +445,67 @@ async function fetchRealStocks(){
         if(!r.ok) continue;
         var j=await r.json();
         var parsed=proxies[i].parse(j);
-        if(parsed&&parsed.data&&parsed.data.diff) return parsed;
+        if(parsed&&parsed.data&&parsed.data.diff) return{data:parsed,method:'proxy',idx:i};
       }catch(e){}
     }
 
-    // Strategy 3: Direct fetch (works from local server without CORS issues)
+    // Strategy 3: Direct fetch
+    try{var r=await fetch(url,{headers:{'Accept':'application/json'}});if(!r.ok)return null;var j=await r.json();return{data:j,method:'direct'}}catch(e){return null}
+  }
+
+  async function fetchPageByMethod(pn,pz,method,proxyIdx){
+    var url=makeUrl(pn,pz);
+    if(method==='jsonp'){
+      var cbParams=['cb','callback','jsonpCallback'];
+      for(var i=0;i<cbParams.length;i++){
+        try{var d=await fetchJSONP(url,cbParams[i],8000);if(d&&d.data&&d.data.diff)return d}catch(e){}
+      }
+      return null;
+    }
+    if(method==='proxy'){
+      var proxies=[
+        {url:'https://corsproxy.io/?',parse:function(j){return j.data&&j.data.diff?j:null}},
+        {url:'https://api.allorigins.win/raw?url=',parse:function(j){return j.contents?JSON.parse(j.contents):null}},
+        {url:'https://cors.kylehuynh.com/?url=',parse:function(j){return j.data&&j.data.diff?j:null}},
+        {url:'https://cors.eu.org/?',parse:function(j){return j.data&&j.data.diff?j:null}},
+        {url:'https://cors.aeiot.xyz/?',parse:function(j){return j.data&&j.data.diff?j:null}},
+      ];
+      // Rotate: use different proxy for each page to spread load
+      var idx=(proxyIdx+p-1)%proxies.length;
+      try{
+        var r=await fetch(proxies[idx].url+encodeURIComponent(url),{headers:{'Accept':'application/json'}});
+        if(!r.ok) return null;
+        var j=await r.json();
+        return proxies[idx].parse(j);
+      }catch(e){return null}
+    }
+    // Direct
     try{var r=await fetch(url,{headers:{'Accept':'application/json'}});if(!r.ok)return null;return await r.json()}catch(e){return null}
   }
 
   try{
-    // Try larger page size first, fall back to 500 if API rejects
-    var PAGE_SIZE=1000;
-    var j1=await fetchPage(1,PAGE_SIZE);
-    if(!j1||!j1.data||!j1.data.diff||(j1.data.diff||[]).length<10){
-      PAGE_SIZE=500;
-      j1=await fetchPage(1,PAGE_SIZE);
-    }
-    if(!j1||!j1.data||!j1.data.diff) throw new Error('API响应格式异常');
+    var PAGE_SIZE=500;
+    // Probe page 1 to find working strategy
+    var probe=await tryAllStrategies(makeUrl(1,PAGE_SIZE));
+    if(!probe||!probe.data||!probe.data.data||!probe.data.data.diff) throw new Error('API响应格式异常');
 
-    var total=j1.data.total||0;
-    var all=itemsToStocks(j1.data.diff);
+    var total=probe.data.data.total||0;
+    var all=itemsToStocks(probe.data.data.diff);
+    var pages=Math.ceil(total/PAGE_SIZE);
 
-    if(total>PAGE_SIZE){
-      var pages=Math.ceil(total/PAGE_SIZE);
+    if(pages>1){
       for(var p=2;p<=pages;p++){
-        // Delay between pages to avoid rate limiting (800ms after page 2)
-        if(p>2) await new Promise(function(r){setTimeout(r,800)});
-        var j=await fetchPage(p,PAGE_SIZE);
-        if(!j||!j.data||!j.data.diff){
-          // Retry once after a longer pause (1.5s)
-          await new Promise(function(r){setTimeout(r,1500)});
-          j=await fetchPage(p,PAGE_SIZE);
-        }
-        if(!j||!j.data||!j.data.diff) continue; // skip failed page, don't break
-        all=all.concat(itemsToStocks(j.data.diff));
         var btnR=document.getElementById('btnReal');
-        if(btnR) btnR.innerHTML='<span class="spinner"></span> 加载 '+p+'/'+pages+' 页';
+        if(btnR) btnR.innerHTML='<span class="spinner"></span> '+p+'/'+pages+'页';
+        // Delay 1.5s between pages to avoid rate limits
+        await new Promise(function(r){setTimeout(r,1500)});
+        var j=await fetchPageByMethod(p,PAGE_SIZE,probe.method,probe.idx||0);
+        if(!j||!j.data||!j.data.diff){
+          // Retry with 3s delay
+          await new Promise(function(r){setTimeout(r,3000)});
+          j=await fetchPageByMethod(p,PAGE_SIZE,probe.method,probe.idx||0);
+        }
+        if(j&&j.data&&j.data.diff) all=all.concat(itemsToStocks(j.data.diff));
       }
     }
     return all;

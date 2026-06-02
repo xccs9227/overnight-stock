@@ -384,136 +384,246 @@ function generateBacktestStocks(baseStocks,dayOffset){
   });
 }
 
-// ============================================================
-// REAL DATA (EAST MONEY API — multi-strategy: JSONP → Proxy → Direct)
-// ============================================================
-async function fetchRealStocks(){
-  const fields='f2,f3,f4,f5,f6,f7,f8,f9,f10,f12,f14,f15,f16,f17,f18,f20,f21,f23,f62,f115';
-  const fs='m:0+t:6,m:0+t:80,m:1+t:2,m:1+t:23';
+	// ============================================================
+	// REAL DATA (EAST MONEY API — method pool with intelligent rotation)
+	// Key insight: probe ALL methods, collect working ones into a pool,
+	// then for each page try methods from pool until one succeeds.
+	// Dead methods are removed so they don't slow down later pages.
+	// ============================================================
+	async function fetchRealStocks(){
+	  const fields='f2,f3,f4,f5,f6,f7,f8,f9,f10,f12,f14,f15,f16,f17,f18,f20,f21,f23,f62,f115';
+	  const fs='m:0+t:6,m:0+t:80,m:1+t:2,m:1+t:23';
 
-  function makeUrl(pn,pz){
-    return `https://push2.eastmoney.com/api/qt/clist/get?pn=${pn}&pz=${pz}&po=1&np=1&fltt=2&invt=2&fid=f3&fs=${encodeURIComponent(fs)}&fields=${fields}&ut=bd1d9ddb04089700cf9c27f6f7426281`;
-  }
+	  function makeUrl(pn,pz){
+	    return `https://push2.eastmoney.com/api/qt/clist/get?pn=${pn}&pz=${pz}&po=1&np=1&fltt=2&invt=2&fid=f3&fs=${encodeURIComponent(fs)}&fields=${fields}&ut=bd1d9ddb04089700cf9c27f6f7426281`;
+	  }
 
-  function itemsToStocks(items){
-    return items.filter(item=>{
-      const name=item.f14||'';
-      if(name.includes('ST')||name.includes('*ST')||name.includes('退')) return false;
-      if(item.f3===null||item.f3===undefined) return false;
-      return true;
-    }).map(item=>({
-      code:String(item.f12||''),
-      name:String(item.f14||''),
-      price:parseFloat(item.f2||0),
-      pct_change:parseFloat(item.f3||0),
-      turnover:parseFloat(item.f8||0),
-      volume_ratio:parseFloat(item.f10||1),
-      amount:parseFloat(item.f6||0),
-      float_mcap:parseFloat(item.f21||0),
-      pe:parseFloat(item.f9||0)||parseFloat(item.f115||0)||0,
-      pb:parseFloat(item.f23||0),
-      amplitude:parseFloat(item.f7||0),
-      main_net_inflow:parseFloat(item.f62||0),
-      prev_close:parseFloat(item.f18||0)||parseFloat(item.f2||0)/(1+parseFloat(item.f3||0)/100),
-      high:parseFloat(item.f15||0),
-      low:parseFloat(item.f16||0),
-      open:parseFloat(item.f17||0),
-    }));
-  }
+	  function itemsToStocks(items){
+	    return items.filter(item=>{
+	      const name=item.f14||'';
+	      if(name.includes('ST')||name.includes('*ST')||name.includes('退')) return false;
+	      if(item.f3===null||item.f3===undefined) return false;
+	      return true;
+	    }).map(item=>({
+	      code:String(item.f12||''),
+	      name:String(item.f14||''),
+	      price:parseFloat(item.f2||0),
+	      pct_change:parseFloat(item.f3||0),
+	      turnover:parseFloat(item.f8||0),
+	      volume_ratio:parseFloat(item.f10||1),
+	      amount:parseFloat(item.f6||0),
+	      float_mcap:parseFloat(item.f21||0),
+	      pe:parseFloat(item.f9||0)||parseFloat(item.f115||0)||0,
+	      pb:parseFloat(item.f23||0),
+	      amplitude:parseFloat(item.f7||0),
+	      main_net_inflow:parseFloat(item.f62||0),
+	      prev_close:parseFloat(item.f18||0)||parseFloat(item.f2||0)/(1+parseFloat(item.f3||0)/100),
+	      high:parseFloat(item.f15||0),
+	      low:parseFloat(item.f16||0),
+	      open:parseFloat(item.f17||0),
+	    }));
+	  }
 
-  // Detect which strategy works on page 1, then use same strategy for all pages
-  async function tryAllStrategies(url){
-    var encoded=encodeURIComponent(url);
+	  // ── Method definitions ──
+	  // Each method: {name, tryFetch(url)} — tryFetch must return parsed API data or null
 
-    // Strategy 1: JSONP
-    var cbParams=['cb','callback','jsonpCallback'];
-    for(var i=0;i<cbParams.length;i++){
-      try{var d=await fetchJSONP(url,cbParams[i],8000);if(d&&d.data&&d.data.diff)return{data:d,method:'jsonp'}}catch(e){}
-    }
+	  function buildMethodPool(){
+	    var pool=[];
 
-    // Strategy 2: CORS proxies (rotated)
-    var proxies=[
-      {url:'https://corsproxy.io/?',parse:function(j){return j.data&&j.data.diff?j:null}},
-      {url:'https://api.allorigins.win/raw?url=',parse:function(j){return j.contents?JSON.parse(j.contents):null}},
-      {url:'https://cors.kylehuynh.com/?url=',parse:function(j){return j.data&&j.data.diff?j:null}},
-      {url:'https://cors.eu.org/?',parse:function(j){return j.data&&j.data.diff?j:null}},
-      {url:'https://cors.aeiot.xyz/?',parse:function(j){return j.data&&j.data.diff?j:null}},
-    ];
-    for(var i=0;i<proxies.length;i++){
-      try{
-        var r=await fetch(proxies[i].url+encoded,{headers:{'Accept':'application/json'}});
-        if(!r.ok) continue;
-        var j=await r.json();
-        var parsed=proxies[i].parse(j);
-        if(parsed&&parsed.data&&parsed.data.diff) return{data:parsed,method:'proxy',idx:i};
-      }catch(e){}
-    }
+	    // ── JSONP methods (direct, no proxy, no CORS) ──
+	    var cbParams=[
+	      {p:'cb',label:'jsonp-cb'},
+	      {p:'callback',label:'jsonp-cb2'},
+	      {p:'jsonpCallback',label:'jsonp-cb3'},
+	      {p:'jsoncallback',label:'jsonp-cb4'},
+	      {p:'_cb',label:'jsonp-cb5'},
+	      {p:'_callback',label:'jsonp-cb6'},
+	    ];
+	    for(var i=0;i<cbParams.length;i++){
+	      (function(cfg){
+	        pool.push({
+	          name:cfg.label,
+	          category:'jsonp',
+	          failures:0,
+	          tryFetch:async function(url){
+	            try{
+	              var d=await fetchJSONP(url,cfg.p,8000);
+	              if(d&&d.data&&d.data.diff) return d;
+	            }catch(e){}
+	            return null;
+	          }
+	        });
+	      })(cbParams[i]);
+	    }
 
-    // Strategy 3: Direct fetch
-    try{var r=await fetch(url,{headers:{'Accept':'application/json'}});if(!r.ok)return null;var j=await r.json();return{data:j,method:'direct'}}catch(e){return null}
-  }
+	    // ── CORS proxies ──
+	    var proxies=[
+	      {name:'corsproxy.io',      url:'https://corsproxy.io/?',                 parse:function(j){return j&&j.data&&j.data.diff?j:null}},
+	      {name:'allorigins.win',    url:'https://api.allorigins.win/raw?url=',    parse:function(j){try{return j&&j.contents?JSON.parse(j.contents):null}catch(e){return null}}},
+	      {name:'cors.eu.org',       url:'https://cors.eu.org/?',                  parse:function(j){return j&&j.data&&j.data.diff?j:null}},
+	      {name:'cors.aeiot.xyz',    url:'https://cors.aeiot.xyz/?',               parse:function(j){return j&&j.data&&j.data.diff?j:null}},
+	      {name:'cors.kylehuynh',    url:'https://cors.kylehuynh.com/?url=',        parse:function(j){return j&&j.data&&j.data.diff?j:null}},
+	      {name:'cors-anywhere',     url:'https://cors-anywhere.herokuapp.com/',   parse:function(j){return j&&j.data&&j.data.diff?j:null}},
+	      {name:'codetabs',          url:'https://api.codetabs.com/v1/proxy?quest=',parse:function(j){return j&&j.data&&j.data.diff?j:null}},
+	      {name:'cors.bridged.cc',   url:'https://cors.bridged.cc/',               parse:function(j){return j&&j.data&&j.data.diff?j:null}},
+	    ];
+	    for(var i=0;i<proxies.length;i++){
+	      (function(px){
+	        pool.push({
+	          name:px.name,
+	          category:'proxy',
+	          failures:0,
+	          tryFetch:async function(url){
+	            try{
+	              var r=await fetch(px.url+encodeURIComponent(url),{headers:{'Accept':'application/json'}});
+	              if(!r.ok) return null;
+	              var j=await r.json();
+	              var parsed=px.parse(j);
+	              if(parsed&&parsed.data&&parsed.data.diff) return parsed;
+	            }catch(e){}
+	            return null;
+	          }
+	        });
+	      })(proxies[i]);
+	    }
 
-  async function fetchPageByMethod(pn,pz,method,proxyIdx){
-    var url=makeUrl(pn,pz);
-    if(method==='jsonp'){
-      var cbParams=['cb','callback','jsonpCallback'];
-      for(var i=0;i<cbParams.length;i++){
-        try{var d=await fetchJSONP(url,cbParams[i],8000);if(d&&d.data&&d.data.diff)return d}catch(e){}
-      }
-      return null;
-    }
-    if(method==='proxy'){
-      var proxies=[
-        {url:'https://corsproxy.io/?',parse:function(j){return j.data&&j.data.diff?j:null}},
-        {url:'https://api.allorigins.win/raw?url=',parse:function(j){return j.contents?JSON.parse(j.contents):null}},
-        {url:'https://cors.kylehuynh.com/?url=',parse:function(j){return j.data&&j.data.diff?j:null}},
-        {url:'https://cors.eu.org/?',parse:function(j){return j.data&&j.data.diff?j:null}},
-        {url:'https://cors.aeiot.xyz/?',parse:function(j){return j.data&&j.data.diff?j:null}},
-      ];
-      // Rotate: use different proxy for each page to spread load
-      var idx=(proxyIdx+p-1)%proxies.length;
-      try{
-        var r=await fetch(proxies[idx].url+encodeURIComponent(url),{headers:{'Accept':'application/json'}});
-        if(!r.ok) return null;
-        var j=await r.json();
-        return proxies[idx].parse(j);
-      }catch(e){return null}
-    }
-    // Direct
-    try{var r=await fetch(url,{headers:{'Accept':'application/json'}});if(!r.ok)return null;return await r.json()}catch(e){return null}
-  }
+	    // ── Direct fetch (last resort, usually blocked by CORS) ──
+	    pool.push({
+	      name:'direct',
+	      category:'direct',
+	      failures:0,
+	      tryFetch:async function(url){
+	        try{
+	          var r=await fetch(url,{headers:{'Accept':'application/json'}});
+	          if(!r.ok) return null;
+	          var j=await r.json();
+	          if(j&&j.data&&j.data.diff) return j;
+	        }catch(e){}
+	        return null;
+	      }
+	    });
 
-  try{
-    var PAGE_SIZE=500;
-    // Probe page 1 to find working strategy
-    var probe=await tryAllStrategies(makeUrl(1,PAGE_SIZE));
-    if(!probe||!probe.data||!probe.data.data||!probe.data.data.diff) throw new Error('API响应格式异常');
+	    return pool;
+	  }
 
-    var total=probe.data.data.total||0;
-    var all=itemsToStocks(probe.data.data.diff);
-    var pages=Math.ceil(total/PAGE_SIZE);
+	  // ── Probe: test a method against a URL with timeout ──
+	  async function probeMethod(method,url,timeoutMs){
+	    try{
+	      var result=await Promise.race([
+	        method.tryFetch(url),
+	        new Promise(function(_,reject){setTimeout(function(){reject(new Error('timeout'))},timeoutMs||10000)})
+	      ]);
+	      return result;
+	    }catch(e){
+	      return null;
+	    }
+	  }
 
-    if(pages>1){
-      for(var p=2;p<=pages;p++){
-        var btnR=document.getElementById('btnReal');
-        if(btnR) btnR.innerHTML='<span class="spinner"></span> '+p+'/'+pages+'页';
-        // Delay 1.5s between pages to avoid rate limits
-        await new Promise(function(r){setTimeout(r,1500)});
-        var j=await fetchPageByMethod(p,PAGE_SIZE,probe.method,probe.idx||0);
-        if(!j||!j.data||!j.data.diff){
-          // Retry with 3s delay
-          await new Promise(function(r){setTimeout(r,3000)});
-          j=await fetchPageByMethod(p,PAGE_SIZE,probe.method,probe.idx||0);
-        }
-        if(j&&j.data&&j.data.diff) all=all.concat(itemsToStocks(j.data.diff));
-      }
-    }
-    return all;
-  }catch(e){
-    console.error('API请求失败:',e);
-    return null;
-  }
-}
+	  // ── Main fetch logic ──
+	  try{
+	    var PAGE_SIZE=500;
+	    var page1Url=makeUrl(1,PAGE_SIZE);
+	    var allMethods=buildMethodPool();
+	    var workingPool=[];
+	    var page1Data=null;
+	    var debugLog=[];
+
+	    // Phase 1: Probe each method on page 1, collect ALL working ones
+	    // JSONP first (fastest + no proxy rate limits), then proxies, then direct
+	    for(var i=0;i<allMethods.length;i++){
+	      var m=allMethods[i];
+	      var result=await probeMethod(m,page1Url,10000);
+	      if(result&&result.data&&result.data.diff){
+	        workingPool.push(m);
+	        debugLog.push('✓ '+m.name);
+	        if(!page1Data) page1Data=result;
+	      } else {
+	        debugLog.push('✗ '+m.name);
+	      }
+	      // Small gap between probes to avoid triggering rate limits
+	      if(i<allMethods.length-1) await new Promise(function(r){setTimeout(r,300)});
+	    }
+
+	    if(workingPool.length===0||!page1Data){
+	      console.error('No method works for page 1. Debug:',debugLog.join(', '));
+	      return null;
+	    }
+	    console.log('Working methods ('+workingPool.length+'):',workingPool.map(function(m){return m.name}).join(', '));
+
+	    var total=page1Data.data.total||0;
+	    var all=itemsToStocks(page1Data.data.diff);
+	    var pages=Math.ceil(total/PAGE_SIZE);
+	    console.log('Total stocks:'+total+', pages:'+pages+', pool size:'+workingPool.length);
+
+	    // Phase 2: Fetch remaining pages using method pool
+	    if(pages>1){
+	      var poolIdx=0;
+	      var failedPages=0;
+
+	      for(var p=2;p<=pages;p++){
+	        var btnR=document.getElementById('btnReal');
+	        var pageOk=false;
+
+	        // Try up to 6 attempts per page, rotating through pool
+	        var maxAttempts=Math.min(6,workingPool.length*3);
+	        for(var attempt=0;attempt<maxAttempts&&!pageOk;attempt++){
+	          var method=workingPool[poolIdx%workingPool.length];
+	          poolIdx++;
+
+	          // Delay: 2s base + 2s per retry (2s, 4s, 6s, 8s...)
+	          var delayMs=2000+attempt*2000;
+	          if(btnR) btnR.innerHTML='<span class="spinner"></span> '+p+'/'+pages+' ['+method.name+']';
+	          await new Promise(function(r){setTimeout(r,delayMs)});
+
+	          try{
+	            var j=await probeMethod(method,makeUrl(p,PAGE_SIZE),12000);
+	            if(j&&j.data&&j.data.diff){
+	              var newStocks=itemsToStocks(j.data.diff);
+	              all=all.concat(newStocks);
+	              pageOk=true;
+	              method.failures=0;
+	            }else{
+	              method.failures=(method.failures||0)+1;
+	            }
+	          }catch(e){
+	            method.failures=(method.failures||0)+1;
+	          }
+
+	          // Remove persistently failing methods
+	          if(method.failures>=3){
+	            var idx=workingPool.indexOf(method);
+	            if(idx>=0){
+	              console.log('Removing dead method: '+method.name);
+	              workingPool.splice(idx,1);
+	            }
+	          }
+	        }
+
+	        if(!pageOk){
+	          failedPages++;
+	          console.warn('Page '+p+' failed after '+maxAttempts+' attempts');
+	        }
+
+	        // Stop early if pool is empty
+	        if(workingPool.length===0){
+	          console.warn('All methods exhausted at page '+p+'/'+pages);
+	          break;
+	        }
+	      }
+
+	      if(failedPages>0&&btnR){
+	        btnR.innerHTML='⚠️ '+all.length+'只 ('+failedPages+'页失败)';
+	      }
+	    }
+
+	    console.log('Final count:'+all.length+' stocks from '+pages+' pages');
+	    return all;
+	  }catch(e){
+	    console.error('API请求失败:',e);
+	    return null;
+	  }
+	}
+
 
 async function fetchMarketIndex(){
   // Tencent API for indices (returns GBK encoding)

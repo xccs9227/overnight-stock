@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
-<title>一夜持股法 · 选股系统</title>
+<title>涓€澶滄寔鑲℃硶 路 閫夎偂绯荤粺</title>
 <style>
 :root{--bg:#f5f5f5;--card:#fff;--text:#222;--sub:#888;--red:#e83939;--green:#1aad19;--blue:#1677ff;--bdr:#e8e8e8;--tag-bg:#f0f0f0;--hover:#fafafa}
 .dark{--bg:#1a1a2e;--card:#222244;--text:#eee;--sub:#aaa;--bdr:#333;--tag-bg:#333;--hover:#2a2a44}
@@ -63,88 +63,86 @@ select,input[type=number]{padding:8px 12px;border-radius:8px;border:1px solid va
 <div class="header">
   <div class="header-row">
     <div>
-      <h1>🏦 一夜持股法 · 选股</h1>
-      <div class="sub" id="headerTime">加载中...</div>
+      <h1>馃彟 涓€澶滄寔鑲℃硶 路 閫夎偂</h1>
+      <div class="sub" id="headerTime">鍔犺浇涓?..</div>
     </div>
-    <button class="btn-sm" onclick="toggleDark()">🌓</button>
+    <button class="btn-sm" onclick="toggleDark()">馃寭</button>
   </div>
 </div>
 
 <div class="tabs">
-  <button class="tab active" onclick="switchTab('screen')"><span class="tab-emoji">🔍</span>筛选</button>
-  <button class="tab" onclick="switchTab('premarket')"><span class="tab-emoji">🌅</span>盘前</button>
-  <button class="tab" onclick="switchTab('sell')"><span class="tab-emoji">📋</span>卖出</button>
-  <button class="tab" onclick="switchTab('backtest')"><span class="tab-emoji">📈</span>回测</button>
+  <button class="tab active" onclick="switchTab('screen')"><span class="tab-emoji">馃攳</span>绛涢€?/button>
+  <button class="tab" onclick="switchTab('premarket')"><span class="tab-emoji">馃寘</span>鐩樺墠</button>
+  <button class="tab" onclick="switchTab('sell')"><span class="tab-emoji">馃搵</span>鍗栧嚭</button>
+  <button class="tab" onclick="switchTab('backtest')"><span class="tab-emoji">馃搱</span>鍥炴祴</button>
 </div>
 
 <div id="toast" class="toast"></div>
 
-<!-- ====== 筛选 TAB ====== -->
+<!-- ====== 绛涢€?TAB ====== -->
 <div id="tab-screen">
   <div class="card">
-    <div class="card-title">📡 数据来源</div>
+    <div class="card-title">馃摗 鏁版嵁鏉ユ簮</div>
     <div style="display:flex;gap:8px">
-      <button class="btn btn-primary" id="btnReal" onclick="runScreen(true)" style="flex:1">🌐 实时数据</button>
-      <button class="btn btn-outline" id="btnMock" onclick="runScreen(false)" style="flex:1">🔧 模拟测试</button>
+      <button class="btn btn-primary" id="btnReal" onclick="runScreen(true)" style="flex:1">馃寪 瀹炴椂鏁版嵁</button>
+      <button class="btn btn-outline" id="btnMock" onclick="runScreen(false)" style="flex:1">馃敡 妯℃嫙娴嬭瘯</button>
     </div>
     <div style="font-size:11px;color:var(--sub);margin-top:8px;text-align:center" id="dataHint">
-      实时数据来自东方财富API（需联网）<br>模拟数据包含80只典型标的，可离线测试
-    </div>
+      瀹炴椂鏁版嵁鏉ヨ嚜涓滄柟璐㈠瘜API锛堥渶鑱旂綉锛?br>妯℃嫙鏁版嵁鍖呭惈80鍙吀鍨嬫爣鐨勶紝鍙绾挎祴璇?    </div>
   </div>
 
   <div class="card" id="envCard" style="display:none">
-    <div class="card-title">📊 大盘环境</div>
+    <div class="card-title">馃搳 澶х洏鐜</div>
     <div id="envContent"></div>
   </div>
 
   <div class="card" id="filterCard" style="display:none">
-    <div class="card-title">📋 筛选条件</div>
+    <div class="card-title">馃搵 绛涢€夋潯浠?/div>
     <div class="info-grid">
-      <div class="info-item"><div class="info-num" id="fcTotal">-</div><div class="info-label">全市场</div></div>
-      <div class="info-item"><div class="info-num" id="fcPass">-</div><div class="info-label">通过初筛</div></div>
-      <div class="info-item"><div class="info-num" id="fcScore">-</div><div class="info-label">≥70分</div></div>
-      <div class="info-item"><div class="info-num" id="fcFinal">-</div><div class="info-label">最终入选</div></div>
+      <div class="info-item"><div class="info-num" id="fcTotal">-</div><div class="info-label">鍏ㄥ競鍦?/div></div>
+      <div class="info-item"><div class="info-num" id="fcPass">-</div><div class="info-label">閫氳繃鍒濈瓫</div></div>
+      <div class="info-item"><div class="info-num" id="fcScore">-</div><div class="info-label">鈮?0鍒?/div></div>
+      <div class="info-item"><div class="info-num" id="fcFinal">-</div><div class="info-label">鏈€缁堝叆閫?/div></div>
     </div>
   </div>
 
   <div id="resultsArea"></div>
 </div>
 
-<!-- ====== 盘前 TAB ====== -->
+<!-- ====== 鐩樺墠 TAB ====== -->
 <div id="tab-premarket" style="display:none">
   <div class="card">
-    <div class="card-title">🌅 盘前外部环境检查</div>
-    <button class="btn btn-primary" onclick="runPremarket()">🔄 刷新盘前数据</button>
+    <div class="card-title">馃寘 鐩樺墠澶栭儴鐜妫€鏌?/div>
+    <button class="btn btn-primary" onclick="runPremarket()">馃攧 鍒锋柊鐩樺墠鏁版嵁</button>
     <div id="premarketContent" style="margin-top:12px"></div>
   </div>
 </div>
 
-<!-- ====== 卖出 TAB ====== -->
+<!-- ====== 鍗栧嚭 TAB ====== -->
 <div id="tab-sell" style="display:none">
   <div class="card">
-    <div class="card-title">📋 次日卖出策略</div>
+    <div class="card-title">馃搵 娆℃棩鍗栧嚭绛栫暐</div>
     <p style="font-size:13px;color:var(--sub);margin-bottom:12px">
-      基于最近一次筛选结果的卖出计划。先在「筛选」页运行一次。
-    </p>
+      鍩轰簬鏈€杩戜竴娆＄瓫閫夌粨鏋滅殑鍗栧嚭璁″垝銆傚厛鍦ㄣ€岀瓫閫夈€嶉〉杩愯涓€娆°€?    </p>
     <div id="sellContent">
-      <div style="text-align:center;padding:40px;color:var(--sub)">暂无数据，请先运行筛选 ⬆️</div>
+      <div style="text-align:center;padding:40px;color:var(--sub)">鏆傛棤鏁版嵁锛岃鍏堣繍琛岀瓫閫?猬嗭笍</div>
     </div>
   </div>
 </div>
 
-<!-- ====== 回测 TAB ====== -->
+<!-- ====== 鍥炴祴 TAB ====== -->
 <div id="tab-backtest" style="display:none">
   <div class="card">
-    <div class="card-title">📈 简易回测</div>
-    <div class="row"><span class="label">回测天数</span>
-      <select id="btDays" style="width:auto"><option value="30">30天</option><option value="60">60天</option><option value="90">90天</option></select>
+    <div class="card-title">馃搱 绠€鏄撳洖娴?/div>
+    <div class="row"><span class="label">鍥炴祴澶╂暟</span>
+      <select id="btDays" style="width:auto"><option value="30">30澶?/option><option value="60">60澶?/option><option value="90">90澶?/option></select>
     </div>
-    <button class="btn btn-primary" onclick="runBacktest()" style="margin-top:12px">🔄 运行回测</button>
+    <button class="btn btn-primary" onclick="runBacktest()" style="margin-top:12px">馃攧 杩愯鍥炴祴</button>
     <div id="backtestContent" style="margin-top:12px"></div>
   </div>
 </div>
 
-<!-- ====== 详情弹窗 ====== -->
+<!-- ====== 璇︽儏寮圭獥 ====== -->
 <div class="modal-overlay" id="modal" style="display:none" onclick="closeModal(event)">
   <div class="modal" id="modalContent"></div>
 </div>
@@ -156,31 +154,29 @@ select,input[type=number]{padding:8px 12px;border-radius:8px;border:1px solid va
 const CFG = {
   PCT_CHANGE_MIN:3.0, PCT_CHANGE_MAX:7.0,
   TURNOVER_RATE_MIN:5.0, TURNOVER_RATE_MAX:20.0,
-  FLOAT_MCAP_MIN:5e9, FLOAT_MCAP_MAX:5e11,  // 50亿~5000亿
-  MAIN_NET_INFLOW_MIN:3000e4,  // 3000万
-  MIN_SCORE:70, MAX_OUTPUT:20,
+  FLOAT_MCAP_MIN:5e9, FLOAT_MCAP_MAX:5e11,  // 50浜縹5000浜?  MAIN_NET_INFLOW_MIN:3000e4,  // 3000涓?  MIN_SCORE:70, MAX_OUTPUT:20,
   TOTAL_CAPITAL:100000,
   SELL_TARGET:3.0, SELL_STOP:-2.0, SELL_TIME:'09:35',
   WEIGHTS:{pct_change:15,tail_signal:20,turnover:10,float_mcap:8,fund_flow:12,sector_rank:8,safety_filter:7,market_env:10,trend_position:10},
   SECTOR_KEYWORDS:{
-    '半导体':['芯片','半导体','集成','晶圆','封测','光刻','中芯','华虹','韦尔','兆易','北方华','中微','海光','寒武','景嘉','纳芯','芯','微电','存储','硅','卓胜'],
-    '新能源':['锂','光伏','储能','新能源','风电','氢能','钠电池','宁德','阳光电','隆基','通威','晶澳','天合','亿纬','国轩','孚能','德方','容百','天赐','新宙','恩捷','璞泰'],
-    '消费电子':['电子','手机','穿戴','屏幕','面板','立讯','歌尔','蓝思','领益','信维','电连','长盈','瑞声','舜宇'],
-    '医药生物':['医药','制药','生物','医疗','器械','疫苗','中药','药明','恒瑞','迈瑞','爱尔','通策','泰格','凯莱','康龙','华熙','爱美','贝泰','稳健'],
-    '白酒食品':['酒','食品','饮料','乳业','调味','粮油','茅台','五粮','伊利','海天','金龙','双汇','安井','绝味','良品'],
-    '金融':['银行','证券','保险','信托','期货','招商','平安','中信','国泰','海通','华泰','广发','东方财','同花顺'],
-    '汽车':['汽车','零部件','轮胎','整车','驾驶','比亚迪','长城','吉利','长安','上汽','福耀','玲珑','拓普','三花','德赛'],
-    '军工':['军工','航空','航天','船舶','兵器','雷达','中航','航发','沈飞','西飞','光威','火炬','宝钛','应流','图南','钢研'],
-    '软件AI':['软件','AI','人工','数据','云','信创','网络','金山','用友','科大','广联','中科','浪潮','中软','太极','卫士','奇安','深信','启明'],
-    '电力能源':['电力','电网','煤炭','石油','天然气','特高压','长江','华能','国电','神华','中石','中海'],
-    '房地产':['地产','房产','建材','水泥','装修','家具','万科','保利','海螺','东方雨','北新','欧派','顾家'],
-    '有色钢铁':['钢铁','有色','稀土','黄金','矿产','紫金','宝钢','鞍钢','中铝','云铝','天齐','赣锋','华友','洛阳'],
-    '化工':['化工','化学','塑料','橡胶','纤维','万华','恒力','荣盛','恒逸','桐昆','卫星','宝丰'],
-    '机械装备':['机械','装备','机床','机器','自动','工程','三一','中联','恒立','汇川','先导','浙江鼎','怡合','科博'],
-    '通信5G':['通信','5G','光纤','基站','卫星','中兴','烽火','亨通','中天','长飞','信科'],
-    '农业':['农业','种业','养殖','饲料','农药','化肥','牧原','温氏','新希','海大','大北','隆平','扬农'],
-    '交通运输':['航运','港口','铁路','公路','物流','中远','上港','宁波','大秦','顺丰','圆通','韵达','申通'],
-    '环保':['环保','水务','垃圾','减排','碧水','首创','瀚蓝','伟明']
+    '鍗婂浣?:['鑺墖','鍗婂浣?,'闆嗘垚','鏅跺渾','灏佹祴','鍏夊埢','涓姱','鍗庤櫣','闊﹀皵','鍏嗘槗','鍖楁柟鍗?,'涓井','娴峰厜','瀵掓','鏅槈','绾宠姱','鑺?,'寰數','瀛樺偍','纭?,'鍗撹儨'],
+    '鏂拌兘婧?:['閿?,'鍏変紡','鍌ㄨ兘','鏂拌兘婧?,'椋庣數','姘㈣兘','閽犵數姹?,'瀹佸痉','闃冲厜鐢?,'闅嗗熀','閫氬▉','鏅舵境','澶╁悎','浜跨含','鍥借僵','瀛氳兘','寰锋柟','瀹圭櫨','澶╄祼','鏂板畽','鎭╂嵎','鐠炴嘲'],
+    '娑堣垂鐢靛瓙':['鐢靛瓙','鎵嬫満','绌挎埓','灞忓箷','闈㈡澘','绔嬭','姝屽皵','钃濇€?,'棰嗙泭','淇＄淮','鐢佃繛','闀跨泩','鐟炲０','鑸滃畤'],
+    '鍖昏嵂鐢熺墿':['鍖昏嵂','鍒惰嵂','鐢熺墿','鍖荤枟','鍣ㄦ','鐤嫍','涓嵂','鑽槑','鎭掔憺','杩堢憺','鐖卞皵','閫氱瓥','娉版牸','鍑幈','搴烽緳','鍗庣啓','鐖辩編','璐濇嘲','绋冲仴'],
+    '鐧介厭椋熷搧':['閰?,'椋熷搧','楗枡','涔充笟','璋冨懗','绮补','鑼呭彴','浜旂伯','浼婂埄','娴峰ぉ','閲戦緳','鍙屾眹','瀹変簳','缁濆懗','鑹搧'],
+    '閲戣瀺':['閾惰','璇佸埜','淇濋櫓','淇℃墭','鏈熻揣','鎷涘晢','骞冲畨','涓俊','鍥芥嘲','娴烽€?,'鍗庢嘲','骞垮彂','涓滄柟璐?,'鍚岃姳椤?],
+    '姹借溅':['姹借溅','闆堕儴浠?,'杞儙','鏁磋溅','椹鹃┒','姣斾簹杩?,'闀垮煄','鍚夊埄','闀垮畨','涓婃苯','绂忚€€','鐜茬彂','鎷撴櫘','涓夎姳','寰疯禌'],
+    '鍐涘伐':['鍐涘伐','鑸┖','鑸ぉ','鑸硅埗','鍏靛櫒','闆疯揪','涓埅','鑸彂','娌堥','瑗块','鍏夊▉','鐏偓','瀹濋挍','搴旀祦','鍥惧崡','閽㈢爺'],
+    '杞欢AI':['杞欢','AI','浜哄伐','鏁版嵁','浜?,'淇″垱','缃戠粶','閲戝北','鐢ㄥ弸','绉戝ぇ','骞胯仈','涓','娴疆','涓蒋','澶瀬','鍗＋','濂囧畨','娣变俊','鍚槑'],
+    '鐢靛姏鑳芥簮':['鐢靛姏','鐢电綉','鐓ょ偔','鐭虫补','澶╃劧姘?,'鐗归珮鍘?,'闀挎睙','鍗庤兘','鍥界數','绁炲崕','涓煶','涓捣'],
+    '鎴垮湴浜?:['鍦颁骇','鎴夸骇','寤烘潗','姘存偿','瑁呬慨','瀹跺叿','涓囩','淇濆埄','娴疯灪','涓滄柟闆?,'鍖楁柊','娆ф淳','椤惧'],
+    '鏈夎壊閽㈤搧':['閽㈤搧','鏈夎壊','绋€鍦?,'榛勯噾','鐭夸骇','绱噾','瀹濋挗','闉嶉挗','涓摑','浜戦摑','澶╅綈','璧ｉ攱','鍗庡弸','娲涢槼'],
+    '鍖栧伐':['鍖栧伐','鍖栧','濉戞枡','姗¤兌','绾ょ淮','涓囧崕','鎭掑姏','鑽ｇ洓','鎭掗€?,'妗愭槅','鍗槦','瀹濅赴'],
+    '鏈烘瑁呭':['鏈烘','瑁呭','鏈哄簥','鏈哄櫒','鑷姩','宸ョ▼','涓変竴','涓仈','鎭掔珛','姹囧窛','鍏堝','娴欐睙榧?,'鎬″悎','绉戝崥'],
+    '閫氫俊5G':['閫氫俊','5G','鍏夌氦','鍩虹珯','鍗槦','涓叴','鐑界伀','浜ㄩ€?,'涓ぉ','闀块','淇＄'],
+    '鍐滀笟':['鍐滀笟','绉嶄笟','鍏绘畺','楗叉枡','鍐滆嵂','鍖栬偉','鐗у師','娓╂皬','鏂板笇','娴峰ぇ','澶у寳','闅嗗钩','鎵啘'],
+    '浜ら€氳繍杈?:['鑸繍','娓彛','閾佽矾','鍏矾','鐗╂祦','涓繙','涓婃腐','瀹佹尝','澶хЕ','椤轰赴','鍦嗛€?,'闊佃揪','鐢抽€?],
+    '鐜繚':['鐜繚','姘村姟','鍨冨溇','鍑忔帓','纰ф按','棣栧垱','鐎氳摑','浼熸槑']
   }
 };
 
@@ -197,14 +193,14 @@ let isDark = false;
 // ============================================================
 function $(id){return document.getElementById(id)}
 function toast(msg){const t=$('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2000)}
-function fmtM(v){return v>=1e8?(v/1e8).toFixed(1)+'亿':v>=1e4?(v/1e4).toFixed(0)+'万':v.toFixed(0)}
+function fmtM(v){return v>=1e8?(v/1e8).toFixed(1)+'浜?:v>=1e4?(v/1e4).toFixed(0)+'涓?:v.toFixed(0)}
 function fmtPct(v){return(v>=0?'+':'')+v.toFixed(2)+'%'}
 async function decodeGBK(resp){try{const buf=await resp.arrayBuffer();return new TextDecoder('gbk').decode(buf)}catch(e){return resp.text()}}
 function fmtNum(v,d=2){return v.toFixed(d)}
 function classifySector(name){
   for(const[sector,kws]of Object.entries(CFG.SECTOR_KEYWORDS))
     for(const kw of kws) if(name.indexOf(kw)!==-1) return sector;
-  return '其他';
+  return '鍏朵粬';
 }
 
 // ============================================================
@@ -280,70 +276,70 @@ function calcATR(highs,lows,closes,period=14){
 // ============================================================
 function generateMockStocks(){
   const stocks=[
-    {code:'300896',name:'爱美客',price:358.50,pct_change:5.59,turnover:9.34,volume_ratio:1.85,amount:8.5e8,float_mcap:2.127e11,pe:52.3,pb:8.2,amplitude:4.2,main_net_inflow:4310e4,prev_close:339.50,high:362.00,low:351.20,open:342.00},
-    {code:'000768',name:'中航西飞',price:28.75,pct_change:4.75,turnover:6.58,volume_ratio:1.55,amount:3.2e8,float_mcap:1.318e11,pe:38.5,pb:3.1,amplitude:5.1,main_net_inflow:4780e4,prev_close:27.45,high:29.10,low:27.30,open:27.60},
-    {code:'688256',name:'寒武纪',price:215.80,pct_change:5.40,turnover:5.90,volume_ratio:1.42,amount:5.1e8,float_mcap:3.111e11,pe:-85.2,pb:12.5,amplitude:6.3,main_net_inflow:4646e4,prev_close:204.70,high:219.50,low:207.00,open:207.50},
-    {code:'688111',name:'金山办公',price:385.20,pct_change:4.68,turnover:9.16,volume_ratio:2.10,amount:7.2e8,float_mcap:2.405e11,pe:78.3,pb:10.5,amplitude:5.8,main_net_inflow:3813e4,prev_close:368.00,high:392.00,low:375.00,open:372.00},
-    {code:'600519',name:'贵州茅台',price:1680.00,pct_change:6.34,turnover:10.86,volume_ratio:2.55,amount:25.6e8,float_mcap:4.569e11,pe:35.2,pb:8.5,amplitude:3.2,main_net_inflow:5111e4,prev_close:1580.00,high:1695.00,low:1640.00,open:1595.00},
-    {code:'688072',name:'拓荆科技',price:318.60,pct_change:6.55,turnover:10.30,volume_ratio:2.70,amount:6.8e8,float_mcap:2.188e11,pe:95.3,pb:15.2,amplitude:7.1,main_net_inflow:6331e4,prev_close:299.00,high:325.00,low:305.00,open:302.00},
-    {code:'603338',name:'浙江鼎力',price:72.15,pct_change:5.52,turnover:13.31,volume_ratio:3.20,amount:4.5e8,float_mcap:1.610e11,pe:28.6,pb:5.1,amplitude:6.8,main_net_inflow:4817e4,prev_close:68.38,high:73.80,low:69.20,open:68.90},
-    {code:'300037',name:'新宙邦',price:48.80,pct_change:6.77,turnover:13.73,volume_ratio:3.55,amount:6.1e8,float_mcap:3.190e11,pe:42.8,pb:6.3,amplitude:8.2,main_net_inflow:5084e4,prev_close:45.70,high:50.20,low:46.50,open:46.10},
-    {code:'002371',name:'北方华创',price:352.00,pct_change:6.20,turnover:8.50,volume_ratio:2.20,amount:12.5e8,float_mcap:8.500e11,pe:68.5,pb:14.8,amplitude:5.5,main_net_inflow:8500e4,prev_close:331.50,high:358.00,low:340.00,open:335.00},
-    {code:'300750',name:'宁德时代',price:215.50,pct_change:3.80,turnover:4.20,volume_ratio:1.05,amount:18.2e8,float_mcap:8.200e11,pe:22.5,pb:5.2,amplitude:2.8,main_net_inflow:5200e4,prev_close:207.60,high:218.00,low:210.00,open:209.00},
-    {code:'600809',name:'山西汾酒',price:258.30,pct_change:4.50,turnover:7.20,volume_ratio:1.68,amount:8.8e8,float_mcap:3.150e11,pe:33.8,pb:11.2,amplitude:4.5,main_net_inflow:3850e4,prev_close:247.20,high:262.00,low:252.00,open:250.00},
-    {code:'688981',name:'中芯国际',price:52.80,pct_change:5.10,turnover:6.30,volume_ratio:1.50,amount:10.5e8,float_mcap:4.500e11,pe:45.2,pb:3.5,amplitude:4.8,main_net_inflow:6200e4,prev_close:50.20,high:53.80,low:50.80,open:50.80},
-    {code:'002049',name:'紫光国微',price:98.50,pct_change:5.80,turnover:7.90,volume_ratio:1.95,amount:6.5e8,float_mcap:2.100e11,pe:55.3,pb:8.5,amplitude:5.5,main_net_inflow:4100e4,prev_close:93.10,high:100.20,low:94.50,open:94.00},
-    {code:'603259',name:'药明康德',price:72.30,pct_change:3.50,turnover:5.60,volume_ratio:1.30,amount:5.8e8,float_mcap:1.850e11,pe:25.8,pb:4.5,amplitude:3.8,main_net_inflow:2800e4,prev_close:69.85,high:73.50,low:70.80,open:70.50},
-    {code:'600276',name:'恒瑞医药',price:52.60,pct_change:4.20,turnover:6.80,volume_ratio:1.60,amount:6.2e8,float_mcap:2.800e11,pe:58.2,pb:7.8,amplitude:4.2,main_net_inflow:3500e4,prev_close:50.48,high:53.50,low:51.20,open:51.00},
-    {code:'601012',name:'隆基绿能',price:28.50,pct_change:3.20,turnover:4.50,volume_ratio:1.10,amount:8.2e8,float_mcap:2.100e11,pe:15.2,pb:2.8,amplitude:3.5,main_net_inflow:2100e4,prev_close:27.62,high:29.00,low:27.80,open:27.80},
-    {code:'002594',name:'比亚迪',price:268.00,pct_change:2.80,turnover:3.20,volume_ratio:0.85,amount:15.8e8,float_mcap:7.800e11,pe:28.5,pb:5.8,amplitude:2.5,main_net_inflow:4500e4,prev_close:260.70,high:272.00,low:263.00,open:264.00},
-    {code:'300274',name:'阳光电源',price:85.30,pct_change:4.80,turnover:8.20,volume_ratio:2.05,amount:7.5e8,float_mcap:2.500e11,pe:38.5,pb:7.2,amplitude:5.2,main_net_inflow:3200e4,prev_close:81.40,high:87.00,low:83.00,open:82.50},
-    {code:'688012',name:'中微公司',price:158.20,pct_change:5.30,turnover:6.50,volume_ratio:1.58,amount:5.5e8,float_mcap:2.350e11,pe:72.3,pb:11.5,amplitude:5.8,main_net_inflow:3800e4,prev_close:150.20,high:161.00,low:153.00,open:152.50},
-    {code:'600030',name:'中信证券',price:22.80,pct_change:2.10,turnover:2.50,volume_ratio:0.72,amount:8.5e8,float_mcap:2.800e11,pe:18.5,pb:1.5,amplitude:2.2,main_net_inflow:1800e4,prev_close:22.33,high:23.10,low:22.50,open:22.50},
-    {code:'000858',name:'五粮液',price:158.20,pct_change:3.80,turnover:5.50,volume_ratio:1.28,amount:12.0e8,float_mcap:6.100e11,pe:25.8,pb:5.8,amplitude:3.5,main_net_inflow:4200e4,prev_close:152.40,high:160.50,low:155.00,open:154.00},
-    {code:'601899',name:'紫金矿业',price:18.50,pct_change:6.80,turnover:8.80,volume_ratio:2.40,amount:9.5e8,float_mcap:3.850e11,pe:18.2,pb:3.8,amplitude:7.2,main_net_inflow:5500e4,prev_close:17.32,high:19.10,low:17.80,open:17.60},
-    {code:'300124',name:'汇川技术',price:68.50,pct_change:4.20,turnover:6.80,volume_ratio:1.65,amount:4.8e8,float_mcap:1.820e11,pe:42.5,pb:8.5,amplitude:4.8,main_net_inflow:3100e4,prev_close:65.74,high:69.80,low:66.50,open:66.20},
-    {code:'002415',name:'海康威视',price:35.80,pct_change:3.50,turnover:4.80,volume_ratio:1.15,amount:7.2e8,float_mcap:3.250e11,pe:22.8,pb:4.2,amplitude:3.8,main_net_inflow:2800e4,prev_close:34.59,high:36.50,low:35.00,open:35.00},
-    {code:'600036',name:'招商银行',price:38.50,pct_change:1.80,turnover:1.50,volume_ratio:0.65,amount:12.0e8,float_mcap:7.950e11,pe:6.8,pb:1.1,amplitude:1.5,main_net_inflow:1500e4,prev_close:37.82,high:38.80,low:38.00,open:38.00},
-    {code:'601318',name:'中国平安',price:48.20,pct_change:2.50,turnover:2.80,volume_ratio:0.78,amount:15.0e8,float_mcap:5.100e11,pe:10.5,pb:1.2,amplitude:2.5,main_net_inflow:2800e4,prev_close:47.02,high:48.80,low:47.50,open:47.50},
-    {code:'300760',name:'迈瑞医疗',price:285.00,pct_change:3.80,turnover:5.20,volume_ratio:1.22,amount:8.5e8,float_mcap:3.450e11,pe:35.8,pb:10.2,amplitude:3.5,main_net_inflow:3500e4,prev_close:274.60,high:288.00,low:279.00,open:278.00},
-    {code:'000725',name:'京东方A',price:4.85,pct_change:2.20,turnover:3.50,volume_ratio:0.88,amount:6.5e8,float_mcap:1.780e11,pe:28.5,pb:1.3,amplitude:3.8,main_net_inflow:1200e4,prev_close:4.75,high:4.95,low:4.78,open:4.78},
-    {code:'601166',name:'兴业银行',price:16.80,pct_change:1.20,turnover:1.20,volume_ratio:0.55,amount:5.8e8,float_mcap:3.480e11,pe:4.5,pb:0.65,amplitude:1.2,main_net_inflow:800e4,prev_close:16.60,high:16.95,low:16.70,open:16.70},
+    {code:'300896',name:'鐖辩編瀹?,price:358.50,pct_change:5.59,turnover:9.34,volume_ratio:1.85,amount:8.5e8,float_mcap:2.127e11,pe:52.3,pb:8.2,amplitude:4.2,main_net_inflow:4310e4,prev_close:339.50,high:362.00,low:351.20,open:342.00},
+    {code:'000768',name:'涓埅瑗块',price:28.75,pct_change:4.75,turnover:6.58,volume_ratio:1.55,amount:3.2e8,float_mcap:1.318e11,pe:38.5,pb:3.1,amplitude:5.1,main_net_inflow:4780e4,prev_close:27.45,high:29.10,low:27.30,open:27.60},
+    {code:'688256',name:'瀵掓绾?,price:215.80,pct_change:5.40,turnover:5.90,volume_ratio:1.42,amount:5.1e8,float_mcap:3.111e11,pe:-85.2,pb:12.5,amplitude:6.3,main_net_inflow:4646e4,prev_close:204.70,high:219.50,low:207.00,open:207.50},
+    {code:'688111',name:'閲戝北鍔炲叕',price:385.20,pct_change:4.68,turnover:9.16,volume_ratio:2.10,amount:7.2e8,float_mcap:2.405e11,pe:78.3,pb:10.5,amplitude:5.8,main_net_inflow:3813e4,prev_close:368.00,high:392.00,low:375.00,open:372.00},
+    {code:'600519',name:'璐靛窞鑼呭彴',price:1680.00,pct_change:6.34,turnover:10.86,volume_ratio:2.55,amount:25.6e8,float_mcap:4.569e11,pe:35.2,pb:8.5,amplitude:3.2,main_net_inflow:5111e4,prev_close:1580.00,high:1695.00,low:1640.00,open:1595.00},
+    {code:'688072',name:'鎷撹崋绉戞妧',price:318.60,pct_change:6.55,turnover:10.30,volume_ratio:2.70,amount:6.8e8,float_mcap:2.188e11,pe:95.3,pb:15.2,amplitude:7.1,main_net_inflow:6331e4,prev_close:299.00,high:325.00,low:305.00,open:302.00},
+    {code:'603338',name:'娴欐睙榧庡姏',price:72.15,pct_change:5.52,turnover:13.31,volume_ratio:3.20,amount:4.5e8,float_mcap:1.610e11,pe:28.6,pb:5.1,amplitude:6.8,main_net_inflow:4817e4,prev_close:68.38,high:73.80,low:69.20,open:68.90},
+    {code:'300037',name:'鏂板畽閭?,price:48.80,pct_change:6.77,turnover:13.73,volume_ratio:3.55,amount:6.1e8,float_mcap:3.190e11,pe:42.8,pb:6.3,amplitude:8.2,main_net_inflow:5084e4,prev_close:45.70,high:50.20,low:46.50,open:46.10},
+    {code:'002371',name:'鍖楁柟鍗庡垱',price:352.00,pct_change:6.20,turnover:8.50,volume_ratio:2.20,amount:12.5e8,float_mcap:8.500e11,pe:68.5,pb:14.8,amplitude:5.5,main_net_inflow:8500e4,prev_close:331.50,high:358.00,low:340.00,open:335.00},
+    {code:'300750',name:'瀹佸痉鏃朵唬',price:215.50,pct_change:3.80,turnover:4.20,volume_ratio:1.05,amount:18.2e8,float_mcap:8.200e11,pe:22.5,pb:5.2,amplitude:2.8,main_net_inflow:5200e4,prev_close:207.60,high:218.00,low:210.00,open:209.00},
+    {code:'600809',name:'灞辫タ姹鹃厭',price:258.30,pct_change:4.50,turnover:7.20,volume_ratio:1.68,amount:8.8e8,float_mcap:3.150e11,pe:33.8,pb:11.2,amplitude:4.5,main_net_inflow:3850e4,prev_close:247.20,high:262.00,low:252.00,open:250.00},
+    {code:'688981',name:'涓姱鍥介檯',price:52.80,pct_change:5.10,turnover:6.30,volume_ratio:1.50,amount:10.5e8,float_mcap:4.500e11,pe:45.2,pb:3.5,amplitude:4.8,main_net_inflow:6200e4,prev_close:50.20,high:53.80,low:50.80,open:50.80},
+    {code:'002049',name:'绱厜鍥藉井',price:98.50,pct_change:5.80,turnover:7.90,volume_ratio:1.95,amount:6.5e8,float_mcap:2.100e11,pe:55.3,pb:8.5,amplitude:5.5,main_net_inflow:4100e4,prev_close:93.10,high:100.20,low:94.50,open:94.00},
+    {code:'603259',name:'鑽槑搴峰痉',price:72.30,pct_change:3.50,turnover:5.60,volume_ratio:1.30,amount:5.8e8,float_mcap:1.850e11,pe:25.8,pb:4.5,amplitude:3.8,main_net_inflow:2800e4,prev_close:69.85,high:73.50,low:70.80,open:70.50},
+    {code:'600276',name:'鎭掔憺鍖昏嵂',price:52.60,pct_change:4.20,turnover:6.80,volume_ratio:1.60,amount:6.2e8,float_mcap:2.800e11,pe:58.2,pb:7.8,amplitude:4.2,main_net_inflow:3500e4,prev_close:50.48,high:53.50,low:51.20,open:51.00},
+    {code:'601012',name:'闅嗗熀缁胯兘',price:28.50,pct_change:3.20,turnover:4.50,volume_ratio:1.10,amount:8.2e8,float_mcap:2.100e11,pe:15.2,pb:2.8,amplitude:3.5,main_net_inflow:2100e4,prev_close:27.62,high:29.00,low:27.80,open:27.80},
+    {code:'002594',name:'姣斾簹杩?,price:268.00,pct_change:2.80,turnover:3.20,volume_ratio:0.85,amount:15.8e8,float_mcap:7.800e11,pe:28.5,pb:5.8,amplitude:2.5,main_net_inflow:4500e4,prev_close:260.70,high:272.00,low:263.00,open:264.00},
+    {code:'300274',name:'闃冲厜鐢垫簮',price:85.30,pct_change:4.80,turnover:8.20,volume_ratio:2.05,amount:7.5e8,float_mcap:2.500e11,pe:38.5,pb:7.2,amplitude:5.2,main_net_inflow:3200e4,prev_close:81.40,high:87.00,low:83.00,open:82.50},
+    {code:'688012',name:'涓井鍏徃',price:158.20,pct_change:5.30,turnover:6.50,volume_ratio:1.58,amount:5.5e8,float_mcap:2.350e11,pe:72.3,pb:11.5,amplitude:5.8,main_net_inflow:3800e4,prev_close:150.20,high:161.00,low:153.00,open:152.50},
+    {code:'600030',name:'涓俊璇佸埜',price:22.80,pct_change:2.10,turnover:2.50,volume_ratio:0.72,amount:8.5e8,float_mcap:2.800e11,pe:18.5,pb:1.5,amplitude:2.2,main_net_inflow:1800e4,prev_close:22.33,high:23.10,low:22.50,open:22.50},
+    {code:'000858',name:'浜旂伯娑?,price:158.20,pct_change:3.80,turnover:5.50,volume_ratio:1.28,amount:12.0e8,float_mcap:6.100e11,pe:25.8,pb:5.8,amplitude:3.5,main_net_inflow:4200e4,prev_close:152.40,high:160.50,low:155.00,open:154.00},
+    {code:'601899',name:'绱噾鐭夸笟',price:18.50,pct_change:6.80,turnover:8.80,volume_ratio:2.40,amount:9.5e8,float_mcap:3.850e11,pe:18.2,pb:3.8,amplitude:7.2,main_net_inflow:5500e4,prev_close:17.32,high:19.10,low:17.80,open:17.60},
+    {code:'300124',name:'姹囧窛鎶€鏈?,price:68.50,pct_change:4.20,turnover:6.80,volume_ratio:1.65,amount:4.8e8,float_mcap:1.820e11,pe:42.5,pb:8.5,amplitude:4.8,main_net_inflow:3100e4,prev_close:65.74,high:69.80,low:66.50,open:66.20},
+    {code:'002415',name:'娴峰悍濞佽',price:35.80,pct_change:3.50,turnover:4.80,volume_ratio:1.15,amount:7.2e8,float_mcap:3.250e11,pe:22.8,pb:4.2,amplitude:3.8,main_net_inflow:2800e4,prev_close:34.59,high:36.50,low:35.00,open:35.00},
+    {code:'600036',name:'鎷涘晢閾惰',price:38.50,pct_change:1.80,turnover:1.50,volume_ratio:0.65,amount:12.0e8,float_mcap:7.950e11,pe:6.8,pb:1.1,amplitude:1.5,main_net_inflow:1500e4,prev_close:37.82,high:38.80,low:38.00,open:38.00},
+    {code:'601318',name:'涓浗骞冲畨',price:48.20,pct_change:2.50,turnover:2.80,volume_ratio:0.78,amount:15.0e8,float_mcap:5.100e11,pe:10.5,pb:1.2,amplitude:2.5,main_net_inflow:2800e4,prev_close:47.02,high:48.80,low:47.50,open:47.50},
+    {code:'300760',name:'杩堢憺鍖荤枟',price:285.00,pct_change:3.80,turnover:5.20,volume_ratio:1.22,amount:8.5e8,float_mcap:3.450e11,pe:35.8,pb:10.2,amplitude:3.5,main_net_inflow:3500e4,prev_close:274.60,high:288.00,low:279.00,open:278.00},
+    {code:'000725',name:'浜笢鏂笰',price:4.85,pct_change:2.20,turnover:3.50,volume_ratio:0.88,amount:6.5e8,float_mcap:1.780e11,pe:28.5,pb:1.3,amplitude:3.8,main_net_inflow:1200e4,prev_close:4.75,high:4.95,low:4.78,open:4.78},
+    {code:'601166',name:'鍏翠笟閾惰',price:16.80,pct_change:1.20,turnover:1.20,volume_ratio:0.55,amount:5.8e8,float_mcap:3.480e11,pe:4.5,pb:0.65,amplitude:1.2,main_net_inflow:800e4,prev_close:16.60,high:16.95,low:16.70,open:16.70},
   ];
   // Fill in some extras to make 80
   const extras=[
-    {code:'688008',name:'澜起科技',price:68.20,pct_change:4.50,turnover:7.20,volume_ratio:1.75,amount:3.5e8,float_mcap:1.550e11,pe:55.8,pb:9.5,amplitude:5.5,main_net_inflow:3200e4,prev_close:65.26,high:69.50,low:66.00,open:66.00},
-    {code:'002230',name:'科大讯飞',price:52.80,pct_change:3.80,turnover:5.80,volume_ratio:1.42,amount:5.2e8,float_mcap:1.620e11,pe:68.5,pb:6.8,amplitude:4.5,main_net_inflow:2500e4,prev_close:50.87,high:53.80,low:51.50,open:51.50},
-    {code:'688036',name:'传音控股',price:158.50,pct_change:5.20,turnover:8.50,volume_ratio:2.15,amount:4.8e8,float_mcap:2.050e11,pe:38.5,pb:8.2,amplitude:6.2,main_net_inflow:3800e4,prev_close:150.67,high:162.00,low:154.00,open:153.00},
-    {code:'000977',name:'浪潮信息',price:42.50,pct_change:5.50,turnover:9.20,volume_ratio:2.80,amount:6.8e8,float_mcap:1.350e11,pe:35.2,pb:4.5,amplitude:6.8,main_net_inflow:4200e4,prev_close:40.28,high:43.80,low:41.20,open:41.00},
-    {code:'600588',name:'用友网络',price:28.50,pct_change:4.80,turnover:6.50,volume_ratio:1.58,amount:4.2e8,float_mcap:1.180e11,pe:82.3,pb:7.5,amplitude:5.5,main_net_inflow:2900e4,prev_close:27.19,high:29.20,low:27.80,open:27.80},
-    {code:'002475',name:'立讯精密',price:35.80,pct_change:3.20,turnover:4.50,volume_ratio:1.08,amount:7.5e8,float_mcap:2.550e11,pe:25.8,pb:4.8,amplitude:3.2,main_net_inflow:3100e4,prev_close:34.69,high:36.50,low:35.00,open:35.00},
-    {code:'688561',name:'奇安信',price:58.20,pct_change:5.80,turnover:8.80,volume_ratio:2.30,amount:3.8e8,float_mcap:1.120e11,pe:-35.8,pb:12.5,amplitude:6.5,main_net_inflow:2800e4,prev_close:55.01,high:59.80,low:56.00,open:56.00},
-    {code:'601138',name:'工业富联',price:22.80,pct_change:4.50,turnover:6.20,volume_ratio:1.55,amount:8.5e8,float_mcap:4.520e11,pe:18.5,pb:3.2,amplitude:4.8,main_net_inflow:5200e4,prev_close:21.82,high:23.30,low:22.10,open:22.10},
+    {code:'688008',name:'婢滆捣绉戞妧',price:68.20,pct_change:4.50,turnover:7.20,volume_ratio:1.75,amount:3.5e8,float_mcap:1.550e11,pe:55.8,pb:9.5,amplitude:5.5,main_net_inflow:3200e4,prev_close:65.26,high:69.50,low:66.00,open:66.00},
+    {code:'002230',name:'绉戝ぇ璁',price:52.80,pct_change:3.80,turnover:5.80,volume_ratio:1.42,amount:5.2e8,float_mcap:1.620e11,pe:68.5,pb:6.8,amplitude:4.5,main_net_inflow:2500e4,prev_close:50.87,high:53.80,low:51.50,open:51.50},
+    {code:'688036',name:'浼犻煶鎺ц偂',price:158.50,pct_change:5.20,turnover:8.50,volume_ratio:2.15,amount:4.8e8,float_mcap:2.050e11,pe:38.5,pb:8.2,amplitude:6.2,main_net_inflow:3800e4,prev_close:150.67,high:162.00,low:154.00,open:153.00},
+    {code:'000977',name:'娴疆淇℃伅',price:42.50,pct_change:5.50,turnover:9.20,volume_ratio:2.80,amount:6.8e8,float_mcap:1.350e11,pe:35.2,pb:4.5,amplitude:6.8,main_net_inflow:4200e4,prev_close:40.28,high:43.80,low:41.20,open:41.00},
+    {code:'600588',name:'鐢ㄥ弸缃戠粶',price:28.50,pct_change:4.80,turnover:6.50,volume_ratio:1.58,amount:4.2e8,float_mcap:1.180e11,pe:82.3,pb:7.5,amplitude:5.5,main_net_inflow:2900e4,prev_close:27.19,high:29.20,low:27.80,open:27.80},
+    {code:'002475',name:'绔嬭绮惧瘑',price:35.80,pct_change:3.20,turnover:4.50,volume_ratio:1.08,amount:7.5e8,float_mcap:2.550e11,pe:25.8,pb:4.8,amplitude:3.2,main_net_inflow:3100e4,prev_close:34.69,high:36.50,low:35.00,open:35.00},
+    {code:'688561',name:'濂囧畨淇?,price:58.20,pct_change:5.80,turnover:8.80,volume_ratio:2.30,amount:3.8e8,float_mcap:1.120e11,pe:-35.8,pb:12.5,amplitude:6.5,main_net_inflow:2800e4,prev_close:55.01,high:59.80,low:56.00,open:56.00},
+    {code:'601138',name:'宸ヤ笟瀵岃仈',price:22.80,pct_change:4.50,turnover:6.20,volume_ratio:1.55,amount:8.5e8,float_mcap:4.520e11,pe:18.5,pb:3.2,amplitude:4.8,main_net_inflow:5200e4,prev_close:21.82,high:23.30,low:22.10,open:22.10},
   ];
   for(let i=0;i<extras.length&&stocks.length<80;i++) stocks.push(extras[i]);
   // Pad with name variations if needed
   const more=[
-    {code:'000001',name:'平安银行',price:12.50,pct_change:2.80,turnover:3.50,volume_ratio:0.85,amount:6.5e8,float_mcap:2.420e11,pe:5.8,pb:0.85,amplitude:2.5,main_net_inflow:2500e4,prev_close:12.16,high:12.70,low:12.30,open:12.30},
-    {code:'600900',name:'长江电力',price:22.80,pct_change:1.50,turnover:1.80,volume_ratio:0.58,amount:8.2e8,float_mcap:5.480e11,pe:18.5,pb:2.8,amplitude:1.8,main_net_inflow:1800e4,prev_close:22.46,high:23.00,low:22.60,open:22.60},
-    {code:'300014',name:'亿纬锂能',price:48.50,pct_change:4.20,turnover:6.80,volume_ratio:1.65,amount:5.5e8,float_mcap:2.050e11,pe:38.5,pb:5.8,amplitude:5.2,main_net_inflow:3500e4,prev_close:46.55,high:49.50,low:47.20,open:47.20},
-    {code:'002714',name:'牧原股份',price:42.80,pct_change:3.50,turnover:5.20,volume_ratio:1.22,amount:5.8e8,float_mcap:2.350e11,pe:12.5,pb:3.2,amplitude:3.8,main_net_inflow:2800e4,prev_close:41.35,high:43.50,low:42.00,open:42.00},
-    {code:'603986',name:'兆易创新',price:108.50,pct_change:5.20,turnover:7.80,volume_ratio:1.85,amount:5.5e8,float_mcap:1.850e11,pe:48.5,pb:8.2,amplitude:6.2,main_net_inflow:3800e4,prev_close:103.14,high:111.00,low:105.50,open:105.50},
-    {code:'600031',name:'三一重工',price:32.50,pct_change:4.80,turnover:6.50,volume_ratio:1.55,amount:8.5e8,float_mcap:2.750e11,pe:22.5,pb:3.8,amplitude:5.5,main_net_inflow:4500e4,prev_close:31.01,high:33.20,low:31.80,open:31.80},
-    {code:'601615',name:'明阳智能',price:28.50,pct_change:4.80,turnover:7.50,volume_ratio:1.80,amount:3.2e8,float_mcap:1.250e11,pe:22.5,pb:2.8,amplitude:5.8,main_net_inflow:3200e4,prev_close:27.19,high:29.20,low:27.80,open:27.80},
-    {code:'002459',name:'晶澳科技',price:35.20,pct_change:4.50,turnover:6.80,volume_ratio:1.55,amount:5.8e8,float_mcap:1.680e11,pe:18.5,pb:3.5,amplitude:5.2,main_net_inflow:3600e4,prev_close:33.68,high:36.00,low:34.00,open:34.00},
-    {code:'002129',name:'中环股份',price:32.50,pct_change:3.80,turnover:5.50,volume_ratio:1.28,amount:4.8e8,float_mcap:1.350e11,pe:22.8,pb:3.8,amplitude:4.2,main_net_inflow:2200e4,prev_close:31.31,high:33.20,low:31.80,open:31.80},
-    {code:'600745',name:'闻泰科技',price:68.50,pct_change:4.80,turnover:6.50,volume_ratio:1.55,amount:4.2e8,float_mcap:1.580e11,pe:42.5,pb:5.8,amplitude:5.5,main_net_inflow:3100e4,prev_close:65.36,high:69.80,low:66.50,open:66.50},
-    {code:'601689',name:'拓普集团',price:58.20,pct_change:5.50,turnover:8.20,volume_ratio:2.05,amount:3.8e8,float_mcap:1.420e11,pe:35.8,pb:6.2,amplitude:6.5,main_net_inflow:3800e4,prev_close:55.17,high:59.50,low:56.50,open:56.50},
-    {code:'300363',name:'博腾股份',price:45.80,pct_change:5.20,turnover:7.50,volume_ratio:1.85,amount:3.2e8,float_mcap:1.080e11,pe:32.5,pb:4.8,amplitude:5.8,main_net_inflow:2900e4,prev_close:43.54,high:46.80,low:44.50,open:44.50},
-    {code:'688005',name:'容百科技',price:42.50,pct_change:5.80,turnover:8.50,volume_ratio:2.20,amount:3.5e8,float_mcap:1.250e11,pe:38.5,pb:5.5,amplitude:6.8,main_net_inflow:3500e4,prev_close:40.17,high:43.80,low:41.20,open:41.20},
-    {code:'000568',name:'泸州老窖',price:228.50,pct_change:4.20,turnover:6.50,volume_ratio:1.50,amount:8.5e8,float_mcap:3.350e11,pe:28.5,pb:9.5,amplitude:4.5,main_net_inflow:3800e4,prev_close:219.29,high:232.00,low:224.00,open:222.00},
-    {code:'600436',name:'片仔癀',price:258.00,pct_change:3.80,turnover:5.50,volume_ratio:1.28,amount:5.8e8,float_mcap:2.150e11,pe:55.8,pb:15.2,amplitude:3.8,main_net_inflow:3200e4,prev_close:248.56,high:262.00,low:252.00,open:252.00},
-    {code:'688396',name:'华润微',price:58.20,pct_change:4.50,turnover:6.80,volume_ratio:1.60,amount:3.2e8,float_mcap:1.350e11,pe:48.5,pb:7.8,amplitude:5.5,main_net_inflow:2800e4,prev_close:55.69,high:59.50,low:56.80,open:56.80},
-    {code:'603501',name:'韦尔股份',price:128.50,pct_change:4.80,turnover:6.50,volume_ratio:1.55,amount:6.5e8,float_mcap:2.050e11,pe:45.8,pb:8.5,amplitude:5.8,main_net_inflow:3800e4,prev_close:122.62,high:131.00,low:125.00,open:125.00},
-    {code:'601100',name:'恒立液压',price:68.50,pct_change:4.20,turnover:6.80,volume_ratio:1.65,amount:3.8e8,float_mcap:1.680e11,pe:38.5,pb:7.5,amplitude:5.2,main_net_inflow:3200e4,prev_close:65.74,high:69.80,low:66.50,open:66.50},
-    {code:'603290',name:'斯达半导',price:258.50,pct_change:5.50,turnover:7.80,volume_ratio:1.90,amount:4.5e8,float_mcap:1.820e11,pe:68.5,pb:12.5,amplitude:6.5,main_net_inflow:3500e4,prev_close:245.02,high:263.00,low:251.00,open:251.00},
-    {code:'002241',name:'歌尔股份',price:35.80,pct_change:5.20,turnover:7.80,volume_ratio:1.90,amount:6.2e8,float_mcap:1.320e11,pe:32.5,pb:4.5,amplitude:6.2,main_net_inflow:3800e4,prev_close:34.03,high:36.50,low:34.50,open:34.50},
+    {code:'000001',name:'骞冲畨閾惰',price:12.50,pct_change:2.80,turnover:3.50,volume_ratio:0.85,amount:6.5e8,float_mcap:2.420e11,pe:5.8,pb:0.85,amplitude:2.5,main_net_inflow:2500e4,prev_close:12.16,high:12.70,low:12.30,open:12.30},
+    {code:'600900',name:'闀挎睙鐢靛姏',price:22.80,pct_change:1.50,turnover:1.80,volume_ratio:0.58,amount:8.2e8,float_mcap:5.480e11,pe:18.5,pb:2.8,amplitude:1.8,main_net_inflow:1800e4,prev_close:22.46,high:23.00,low:22.60,open:22.60},
+    {code:'300014',name:'浜跨含閿傝兘',price:48.50,pct_change:4.20,turnover:6.80,volume_ratio:1.65,amount:5.5e8,float_mcap:2.050e11,pe:38.5,pb:5.8,amplitude:5.2,main_net_inflow:3500e4,prev_close:46.55,high:49.50,low:47.20,open:47.20},
+    {code:'002714',name:'鐗у師鑲′唤',price:42.80,pct_change:3.50,turnover:5.20,volume_ratio:1.22,amount:5.8e8,float_mcap:2.350e11,pe:12.5,pb:3.2,amplitude:3.8,main_net_inflow:2800e4,prev_close:41.35,high:43.50,low:42.00,open:42.00},
+    {code:'603986',name:'鍏嗘槗鍒涙柊',price:108.50,pct_change:5.20,turnover:7.80,volume_ratio:1.85,amount:5.5e8,float_mcap:1.850e11,pe:48.5,pb:8.2,amplitude:6.2,main_net_inflow:3800e4,prev_close:103.14,high:111.00,low:105.50,open:105.50},
+    {code:'600031',name:'涓変竴閲嶅伐',price:32.50,pct_change:4.80,turnover:6.50,volume_ratio:1.55,amount:8.5e8,float_mcap:2.750e11,pe:22.5,pb:3.8,amplitude:5.5,main_net_inflow:4500e4,prev_close:31.01,high:33.20,low:31.80,open:31.80},
+    {code:'601615',name:'鏄庨槼鏅鸿兘',price:28.50,pct_change:4.80,turnover:7.50,volume_ratio:1.80,amount:3.2e8,float_mcap:1.250e11,pe:22.5,pb:2.8,amplitude:5.8,main_net_inflow:3200e4,prev_close:27.19,high:29.20,low:27.80,open:27.80},
+    {code:'002459',name:'鏅舵境绉戞妧',price:35.20,pct_change:4.50,turnover:6.80,volume_ratio:1.55,amount:5.8e8,float_mcap:1.680e11,pe:18.5,pb:3.5,amplitude:5.2,main_net_inflow:3600e4,prev_close:33.68,high:36.00,low:34.00,open:34.00},
+    {code:'002129',name:'涓幆鑲′唤',price:32.50,pct_change:3.80,turnover:5.50,volume_ratio:1.28,amount:4.8e8,float_mcap:1.350e11,pe:22.8,pb:3.8,amplitude:4.2,main_net_inflow:2200e4,prev_close:31.31,high:33.20,low:31.80,open:31.80},
+    {code:'600745',name:'闂绘嘲绉戞妧',price:68.50,pct_change:4.80,turnover:6.50,volume_ratio:1.55,amount:4.2e8,float_mcap:1.580e11,pe:42.5,pb:5.8,amplitude:5.5,main_net_inflow:3100e4,prev_close:65.36,high:69.80,low:66.50,open:66.50},
+    {code:'601689',name:'鎷撴櫘闆嗗洟',price:58.20,pct_change:5.50,turnover:8.20,volume_ratio:2.05,amount:3.8e8,float_mcap:1.420e11,pe:35.8,pb:6.2,amplitude:6.5,main_net_inflow:3800e4,prev_close:55.17,high:59.50,low:56.50,open:56.50},
+    {code:'300363',name:'鍗氳吘鑲′唤',price:45.80,pct_change:5.20,turnover:7.50,volume_ratio:1.85,amount:3.2e8,float_mcap:1.080e11,pe:32.5,pb:4.8,amplitude:5.8,main_net_inflow:2900e4,prev_close:43.54,high:46.80,low:44.50,open:44.50},
+    {code:'688005',name:'瀹圭櫨绉戞妧',price:42.50,pct_change:5.80,turnover:8.50,volume_ratio:2.20,amount:3.5e8,float_mcap:1.250e11,pe:38.5,pb:5.5,amplitude:6.8,main_net_inflow:3500e4,prev_close:40.17,high:43.80,low:41.20,open:41.20},
+    {code:'000568',name:'娉稿窞鑰佺獤',price:228.50,pct_change:4.20,turnover:6.50,volume_ratio:1.50,amount:8.5e8,float_mcap:3.350e11,pe:28.5,pb:9.5,amplitude:4.5,main_net_inflow:3800e4,prev_close:219.29,high:232.00,low:224.00,open:222.00},
+    {code:'600436',name:'鐗囦粩鐧€',price:258.00,pct_change:3.80,turnover:5.50,volume_ratio:1.28,amount:5.8e8,float_mcap:2.150e11,pe:55.8,pb:15.2,amplitude:3.8,main_net_inflow:3200e4,prev_close:248.56,high:262.00,low:252.00,open:252.00},
+    {code:'688396',name:'鍗庢鼎寰?,price:58.20,pct_change:4.50,turnover:6.80,volume_ratio:1.60,amount:3.2e8,float_mcap:1.350e11,pe:48.5,pb:7.8,amplitude:5.5,main_net_inflow:2800e4,prev_close:55.69,high:59.50,low:56.80,open:56.80},
+    {code:'603501',name:'闊﹀皵鑲′唤',price:128.50,pct_change:4.80,turnover:6.50,volume_ratio:1.55,amount:6.5e8,float_mcap:2.050e11,pe:45.8,pb:8.5,amplitude:5.8,main_net_inflow:3800e4,prev_close:122.62,high:131.00,low:125.00,open:125.00},
+    {code:'601100',name:'鎭掔珛娑插帇',price:68.50,pct_change:4.20,turnover:6.80,volume_ratio:1.65,amount:3.8e8,float_mcap:1.680e11,pe:38.5,pb:7.5,amplitude:5.2,main_net_inflow:3200e4,prev_close:65.74,high:69.80,low:66.50,open:66.50},
+    {code:'603290',name:'鏂揪鍗婂',price:258.50,pct_change:5.50,turnover:7.80,volume_ratio:1.90,amount:4.5e8,float_mcap:1.820e11,pe:68.5,pb:12.5,amplitude:6.5,main_net_inflow:3500e4,prev_close:245.02,high:263.00,low:251.00,open:251.00},
+    {code:'002241',name:'姝屽皵鑲′唤',price:35.80,pct_change:5.20,turnover:7.80,volume_ratio:1.90,amount:6.2e8,float_mcap:1.320e11,pe:32.5,pb:4.5,amplitude:6.2,main_net_inflow:3800e4,prev_close:34.03,high:36.50,low:34.50,open:34.50},
   ];
   for(const s of more){if(stocks.length>=80)break;stocks.push(s)}
   return stocks;
@@ -376,17 +372,18 @@ function generateBacktestStocks(baseStocks,dayOffset){
 // REAL DATA (EAST MONEY API)
 // ============================================================
 async function fetchRealStocks(){
+  // East Money API: A-share market data
   const fields='f2,f3,f4,f5,f6,f7,f8,f9,f10,f12,f14,f15,f16,f17,f18,f20,f21,f23,f62,f115';
   const fs='m:0+t:6,m:0+t:80,m:1+t:2,m:1+t:23';
 
-  function makeUrl(pn,pz){
-    return `https://push2.eastmoney.com/api/qt/clist/get?pn=${pn}&pz=${pz}&po=1&np=1&fltt=2&invt=2&fid=f3&fs=${encodeURIComponent(fs)}&fields=${fields}&ut=bd1d9ddb04089700cf9c27f6f7426281`;
+  function makeUrl(pz){
+    return `https://push2.eastmoney.com/api/qt/clist/get?pn=1&pz=${pz}&po=1&np=1&fltt=2&invt=2&fid=f3&fs=${encodeURIComponent(fs)}&fields=${fields}&ut=bd1d9ddb04089700cf9c27f6f7426281`;
   }
 
   function itemsToStocks(items){
     return items.filter(item=>{
       const name=item.f14||'';
-      if(name.includes('ST')||name.includes('*ST')||name.includes('退')) return false;
+      if(name.includes('ST')||name.includes('*ST')||name.includes('閫€')) return false;
       if(item.f3===null||item.f3===undefined) return false;
       return true;
     }).map(item=>({
@@ -409,30 +406,31 @@ async function fetchRealStocks(){
     }));
   }
 
-  try{
-    // Page 1 — same URL as original
-    const r1=await fetch(makeUrl(1,500),{headers:{'Accept':'application/json'}});
-    if(!r1.ok) throw new Error(`HTTP ${r1.status}`);
-    const j1=await r1.json();
-    if(!j1.data||!j1.data.diff) throw new Error('API响应格式异常');
-    const total=j1.data.total||0;
-    let all=itemsToStocks(j1.data.diff||[]);
+  // Try progressively smaller page sizes until one works
+  // pz=5000 鈫?all stocks in 1 call. If API rejects, fall back to pz=500.
+  const pageSizes=[5000,2000,1000,500];
+  let lastError=null;
 
-    // If more pages available, fetch them too
-    const pages=Math.ceil(total/500);
-    for(let p=2;p<=pages;p++){
-      try{
-        const r=await fetch(makeUrl(p,500),{headers:{'Accept':'application/json'}});
-        if(!r.ok) continue;
-        const j=await r.json();
-        if(j.data&&j.data.diff) all=all.concat(itemsToStocks(j.data.diff));
-      }catch(e){/* skip failed page */}
+  for(const pz of pageSizes){
+    try{
+      const url=makeUrl(pz);
+      const resp=await fetch(url,{headers:{'Accept':'application/json'}});
+      if(!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      const json=await resp.json();
+      if(!json.data||!json.data.diff) throw new Error('鍝嶅簲鏃犳暟鎹?);
+      const total=json.data.total||0;
+      const stocks=itemsToStocks(json.data.diff||[]);
+      console.log(`fetchRealStocks: pz=${pz} success, got ${stocks.length} stocks (total=${total})`);
+      return stocks;
+    }catch(e){
+      lastError=e;
+      console.warn(`fetchRealStocks: pz=${pz} failed:`,e.message);
+      // continue to next smaller pz
     }
-    return all;
-  }catch(e){
-    console.error('API请求失败:',e);
-    return null;
   }
+
+  console.error('fetchRealStocks: all page sizes failed. Last error:',lastError?.message);
+  return null;
 }
 
 async function fetchMarketIndex(){
@@ -458,7 +456,7 @@ async function fetchMarketIndex(){
     }
     return result;
   }catch(e){
-    console.error('指数获取失败:',e);
+    console.error('鎸囨暟鑾峰彇澶辫触:',e);
     return null;
   }
 }
@@ -477,7 +475,7 @@ function applyPreFilter(stocks){
   });
 }
 
-// Deterministic PRNG (Mulberry32) — seeded by stock code for reproducible scoring
+// Deterministic PRNG (Mulberry32) 鈥?seeded by stock code for reproducible scoring
 function S(s){let h=0;for(let i=0;i<s.length;i++){h=((h<<5)-h+s.charCodeAt(i))|0;}let t=h+0x6D2B79F5;t=Math.imul(t^t>>>15,t|1);t=t+Math.imul(t^t>>>7,t|61);return((t^t>>>14)>>>0)/4294967296;}
 
 // Simulate tail-period analysis (deterministic, seeded by stock.code)
@@ -518,48 +516,48 @@ function scoreAll(candidates,tailData,trendData,marketEnv){
 
     const scores={};
 
-    // 1. 涨跌幅 (15pts) - moderate gain preferred
+    // 1. 娑ㄨ穼骞?(15pts) - moderate gain preferred
     const ap=Math.abs(s.pct_change);
     if(s.pct_change>=4&&s.pct_change<=6) scores.pct_change=15;
     else if(s.pct_change>=3&&s.pct_change<=7) scores.pct_change=12;
     else if(s.pct_change>=2&&s.pct_change<=8) scores.pct_change=8;
     else scores.pct_change=Math.max(0,15-ap*2);
 
-    // 2. 尾盘信号 (20pts)
+    // 2. 灏剧洏淇″彿 (20pts)
     if(tail.pattern_type==='steady_rise') scores.tail_signal=20;
     else if(tail.pattern_type==='sudden_spike') scores.tail_signal=14;
     else if(tail.pattern_type==='neutral') scores.tail_signal=9;
     else scores.tail_signal=4;
 
-    // 3. 换手率 (10pts)
+    // 3. 鎹㈡墜鐜?(10pts)
     if(s.turnover>=8&&s.turnover<=15) scores.turnover=10;
     else if(s.turnover>=5&&s.turnover<=20) scores.turnover=7;
     else scores.turnover=Math.max(0,10-Math.abs(s.turnover-10)*0.5);
 
-    // 4. 流通市值 (8pts)
+    // 4. 娴侀€氬競鍊?(8pts)
     const fmcB=s.float_mcap/1e8;
     if(fmcB>=100&&fmcB<=500) scores.float_mcap=8;
     else if(fmcB>=50&&fmcB<=1000) scores.float_mcap=6;
     else scores.float_mcap=Math.max(2,8-Math.abs(Math.log10(fmcB)-2.5)*3);
 
-    // 5. 资金流向 (12pts)
+    // 5. 璧勯噾娴佸悜 (12pts)
     const nif=s.main_net_inflow/1e4;
     if(nif>=5000) scores.fund_flow=12;
     else if(nif>=3000) scores.fund_flow=9;
     else if(nif>=2000) scores.fund_flow=6;
     else scores.fund_flow=3;
 
-    // 6. 板块排名 (8pts)
+    // 6. 鏉垮潡鎺掑悕 (8pts)
     scores.sector_rank=4;  // Base - in full version fetches real sector rank
 
-    // 7. 安全过滤 (7pts)
+    // 7. 瀹夊叏杩囨护 (7pts)
     let safety=7;
     if(s.pe&&s.pe<0) safety-=3;
     if(s.amplitude>10) safety-=2;
     if(s.volume_ratio>4) safety-=2;
     scores.safety_filter=Math.max(0,safety);
 
-    // 8. 大盘环境 (10pts)
+    // 8. 澶х洏鐜 (10pts)
     if(marketEnv){
       if(marketEnv.status==='good') scores.market_env=10;
       else if(marketEnv.status==='warning') scores.market_env=6;
@@ -569,7 +567,7 @@ function scoreAll(candidates,tailData,trendData,marketEnv){
       scores.market_env=5;
     }
 
-    // 9. 趋势位置 (10pts)
+    // 9. 瓒嬪娍浣嶇疆 (10pts)
     let trendScore=5;
     if(trend.ma_above_count>=4) trendScore=10;
     else if(trend.ma_above_count>=3) trendScore=7;
@@ -632,7 +630,7 @@ function calcVolatilityAdj(atrPct,baseline=3.0){
 function calcPositionSize(capital,price,kelly,atrPct,marketFactor,riskScore){
   const baseAlloc=capital*kelly;
   const volAdj=calcVolatilityAdj(atrPct);
-  const riskFactor={低:1.0,中:0.7,高:0.3}[riskScore]||0.7;
+  const riskFactor={浣?1.0,涓?0.7,楂?0.3}[riskScore]||0.7;
   let adjusted=baseAlloc*volAdj*marketFactor*riskFactor;
   let shares=Math.floor(adjusted/price/100)*100;
   shares=Math.max(100,shares);
@@ -652,17 +650,17 @@ function generateSellPlan(stock,marketEnv){
 
   let marketFactor=1.0,marketNote='';
   if(marketEnv){
-    if(marketEnv.status==='bad'){marketFactor=0.5;marketNote='大盘恶劣，加速卖出';timeLimit='09:32'}
-    else if(marketEnv.status==='warning'){marketFactor=0.8;marketNote='大盘偏弱，降低预期'}
+    if(marketEnv.status==='bad'){marketFactor=0.5;marketNote='澶х洏鎭跺姡锛屽姞閫熷崠鍑?;timeLimit='09:32'}
+    else if(marketEnv.status==='warning'){marketFactor=0.8;marketNote='澶х洏鍋忓急锛岄檷浣庨鏈?}
   }
 
   const targetPrice=price*(1+(targetPct*marketFactor)/100);
   const stopPrice=price*(1+stopPct/100);
   const pe=stock.pe||0;
-  const riskLevel=(pe<0||stock.volume_ratio>5||score<73)?'高':(score<80?'中':'低');
+  const riskLevel=(pe<0||stock.volume_ratio>5||score<73)?'楂?:(score<80?'涓?:'浣?);
 
   // Dynamic ATR stop (aligned with Python calc_dynamic_stop: stop=atr*2, target=atr*3)
-  let atrStop=null,atrTarget=null,atrStopPct=null,atrTargetPct=null,stopMethod='固定';
+  let atrStop=null,atrTarget=null,atrStopPct=null,atrTargetPct=null,stopMethod='鍥哄畾';
   if(stock.atr&&stock.atr>0){
     // Python: stop_loss = entry_price - atr * atr_multiplier (default 2.0)
     // Python: take_profit = entry_price + atr * atr_multiplier * 1.5
@@ -670,7 +668,7 @@ function generateSellPlan(stock,marketEnv){
     atrTarget=parseFloat((price+stock.atr*3).toFixed(2));
     atrStopPct=parseFloat(((atrStop-price)/price*100).toFixed(2));
     atrTargetPct=parseFloat(((atrTarget-price)/price*100).toFixed(2));
-    stopMethod='ATR动态';
+    stopMethod='ATR鍔ㄦ€?;
   }
 
   const finalStop=atrStop?Math.max(atrStop,stopPrice):stopPrice;
@@ -683,7 +681,7 @@ function generateSellPlan(stock,marketEnv){
     target_profit_pct:parseFloat(((finalTarget-price)/price*100).toFixed(1)),
     stop_loss_pct:parseFloat(((finalStop-price)/price*100).toFixed(1)),
     time_limit:timeLimit,risk_level:riskLevel,
-    confidence:score>=85?'高':score>=75?'中':'低',
+    confidence:score>=85?'楂?:score>=75?'涓?:'浣?,
     market_note:marketNote,stop_method:stopMethod,
     atr_stop:atrStop,atr_target:atrTarget,
     atr_stop_pct:atrStopPct,atr_target_pct:atrTargetPct,
@@ -692,7 +690,7 @@ function generateSellPlan(stock,marketEnv){
 // ============================================================
 async function runPremarket(){
   const content=$('premarketContent');
-  content.innerHTML='<div style="text-align:center;padding:20px"><span class="spinner"></span> 检查中...</div>';
+  content.innerHTML='<div style="text-align:center;padding:20px"><span class="spinner"></span> 妫€鏌ヤ腑...</div>';
 
   try{
     const usCodes='gb_dji,gb_ixic,gb_inx';
@@ -726,42 +724,42 @@ async function runPremarket(){
 
     if(usData.length>0){
       const avgPct=usData.reduce((s,[,v])=>s+v.pct,0)/usData.length;
-      if(avgPct>=1){reasons.push(`✅ 隔夜美股向好 (均${avgPct>0?'+':''}${avgPct.toFixed(2)}%)`)}
-      else if(avgPct<-1.5){score-=30;warnings.push(`🔴 隔夜美股大跌 (均${avgPct.toFixed(2)}%)`)}
-      else if(avgPct<0){score-=15;warnings.push(`⚠️ 隔夜美股小跌 (均${avgPct.toFixed(2)}%)`)}
+      if(avgPct>=1){reasons.push(`鉁?闅斿缇庤偂鍚戝ソ (鍧?{avgPct>0?'+':''}${avgPct.toFixed(2)}%)`)}
+      else if(avgPct<-1.5){score-=30;warnings.push(`馃敶 闅斿缇庤偂澶ц穼 (鍧?{avgPct.toFixed(2)}%)`)}
+      else if(avgPct<0){score-=15;warnings.push(`鈿狅笍 闅斿缇庤偂灏忚穼 (鍧?{avgPct.toFixed(2)}%)`)}
     }
 
     if(hkData.length>0){
       const hsi=results['rt_hkHSI'];
       if(hsi){
-        if(hsi.pct>=1) reasons.push(`✅ 港股走强 (恒指${hsi.pct>0?'+':''}${hsi.pct.toFixed(2)}%)`);
-        else if(hsi.pct<-1){score-=20;warnings.push(`🔴 港股走弱 (恒指${hsi.pct.toFixed(2)}%)`)}
-        else if(hsi.pct<0){score-=10;warnings.push(`⚠️ 港股偏弱`)}
+        if(hsi.pct>=1) reasons.push(`鉁?娓偂璧板己 (鎭掓寚${hsi.pct>0?'+':''}${hsi.pct.toFixed(2)}%)`);
+        else if(hsi.pct<-1){score-=20;warnings.push(`馃敶 娓偂璧板急 (鎭掓寚${hsi.pct.toFixed(2)}%)`)}
+        else if(hsi.pct<0){score-=10;warnings.push(`鈿狅笍 娓偂鍋忓急`)}
       }
     }
 
     let overall,advice,emoji;
-    if(score>=80){overall='go';advice='正常执行一夜持股策略';emoji='🟢'}
-    else if(score>=60){overall='caution';advice='建议缩小仓位至50-70%';emoji='🟡'}
-    else if(score>=40){overall='reduce';advice='建议仓位不超过30%或空仓';emoji='🟠'}
-    else{overall='skip';advice='强烈建议空仓观望';emoji='🔴'}
+    if(score>=80){overall='go';advice='姝ｅ父鎵ц涓€澶滄寔鑲＄瓥鐣?;emoji='馃煝'}
+    else if(score>=60){overall='caution';advice='寤鸿缂╁皬浠撲綅鑷?0-70%';emoji='馃煛'}
+    else if(score>=40){overall='reduce';advice='寤鸿浠撲綅涓嶈秴杩?0%鎴栫┖浠?;emoji='馃煚'}
+    else{overall='skip';advice='寮虹儓寤鸿绌轰粨瑙傛湜';emoji='馃敶'}
 
     content.innerHTML=`
       <div style="text-align:center;margin:8px 0">
         <div style="font-size:48px">${emoji}</div>
         <div style="font-size:18px;font-weight:700">${advice}</div>
-        <div style="font-size:14px;color:var(--sub)">外部环境评分: ${score}/100</div>
+        <div style="font-size:14px;color:var(--sub)">澶栭儴鐜璇勫垎: ${score}/100</div>
       </div>
-      ${reasons.length?`<div style="margin-top:12px"><strong>利好:</strong><br>${reasons.map(r=>`<div style="font-size:13px;padding:2px 0">${r}</div>`).join('')}</div>`:''}
-      ${warnings.length?`<div style="margin-top:8px"><strong>风险:</strong><br>${warnings.map(w=>`<div style="font-size:13px;padding:2px 0">${w}</div>`).join('')}</div>`:''}
-      <div style="font-size:12px;color:var(--sub);margin-top:12px">数据来源: 新浪财经</div>
+      ${reasons.length?`<div style="margin-top:12px"><strong>鍒╁ソ:</strong><br>${reasons.map(r=>`<div style="font-size:13px;padding:2px 0">${r}</div>`).join('')}</div>`:''}
+      ${warnings.length?`<div style="margin-top:8px"><strong>椋庨櫓:</strong><br>${warnings.map(w=>`<div style="font-size:13px;padding:2px 0">${w}</div>`).join('')}</div>`:''}
+      <div style="font-size:12px;color:var(--sub);margin-top:12px">鏁版嵁鏉ユ簮: 鏂版氮璐㈢粡</div>
       <div style="margin-top:16px">
-        <div class="card-title">📊 详细数据</div>
+        <div class="card-title">馃搳 璇︾粏鏁版嵁</div>
         ${[...usData,...hkData].map(([k,v])=>`<div class="row"><span class="label">${v.name}</span><span class="value ${v.pct>=0?'red':'green'}">${v.price} (${v.pct>=0?'+':''}${v.pct.toFixed(2)}%)</span></div>`).join('')}
       </div>
     `;
   }catch(e){
-    content.innerHTML=`<div class="warn-box">⚠️ 盘前数据获取失败: ${e.message}<br><br>请确保网络连接正常。新浪API可能暂时不可用。</div>`;
+    content.innerHTML=`<div class="warn-box">鈿狅笍 鐩樺墠鏁版嵁鑾峰彇澶辫触: ${e.message}<br><br>璇风‘淇濈綉缁滆繛鎺ユ甯搞€傛柊娴狝PI鍙兘鏆傛椂涓嶅彲鐢ㄣ€?/div>`;
   }
 }
 
@@ -771,7 +769,7 @@ async function runPremarket(){
 async function runBacktest(){
   const days=parseInt($('btDays').value||30);
   const content=$('backtestContent');
-  content.innerHTML='<div style="text-align:center;padding:20px"><span class="spinner"></span> 回测中... <span id="btProg" style="font-size:12px;color:var(--sub)"></span></div>';
+  content.innerHTML='<div style="text-align:center;padding:20px"><span class="spinner"></span> 鍥炴祴涓?.. <span id="btProg" style="font-size:12px;color:var(--sub)"></span></div>';
 
   const CHUNK=5;
   const baseStocks=generateMockStocks().slice(0,50);
@@ -823,17 +821,17 @@ async function runBacktest(){
 
   content.innerHTML=`
     <div class="info-grid">
-      <div class="info-item"><div class="info-num">${totalTrades}</div><div class="info-label">总交易次数</div></div>
-      <div class="info-item"><div class="info-num ${winRate>=50?'red':'green'}">${winRate.toFixed(1)}%</div><div class="info-label">胜率</div></div>
-      <div class="info-item"><div class="info-num ${avgReturn>=0?'red':'green'}">${avgReturn>=0?'+':''}${avgReturn.toFixed(2)}%</div><div class="info-label">平均收益</div></div>
-      <div class="info-item"><div class="info-num">${sharpe.toFixed(2)}</div><div class="info-label">年化夏普</div></div>
-      <div class="info-item"><div class="info-num ${maxDD<10?'red':'green'}">${maxDD.toFixed(1)}%</div><div class="info-label">最大回撤</div></div>
-      <div class="info-item"><div class="info-num">${avgWin>avgLoss?'👍':'👎'}</div><div class="info-label">盈亏比 ${(avgWin/(avgLoss||1)).toFixed(2)}</div></div>
+      <div class="info-item"><div class="info-num">${totalTrades}</div><div class="info-label">鎬讳氦鏄撴鏁?/div></div>
+      <div class="info-item"><div class="info-num ${winRate>=50?'red':'green'}">${winRate.toFixed(1)}%</div><div class="info-label">鑳滅巼</div></div>
+      <div class="info-item"><div class="info-num ${avgReturn>=0?'red':'green'}">${avgReturn>=0?'+':''}${avgReturn.toFixed(2)}%</div><div class="info-label">骞冲潎鏀剁泭</div></div>
+      <div class="info-item"><div class="info-num">${sharpe.toFixed(2)}</div><div class="info-label">骞村寲澶忔櫘</div></div>
+      <div class="info-item"><div class="info-num ${maxDD<10?'red':'green'}">${maxDD.toFixed(1)}%</div><div class="info-label">鏈€澶у洖鎾?/div></div>
+      <div class="info-item"><div class="info-num">${avgWin>avgLoss?'馃憤':'馃憥'}</div><div class="info-label">鐩堜簭姣?${(avgWin/(avgLoss||1)).toFixed(2)}</div></div>
     </div>
-    <div class="row"><span class="label">Kelly建议仓位</span><span class="value">${(kelly*100).toFixed(1)}%</span></div>
-    <div class="row"><span class="label">平均盈利</span><span class="value red">+${avgWin.toFixed(2)}%</span></div>
-    <div class="row"><span class="label">平均亏损</span><span class="value green">-${avgLoss.toFixed(2)}%</span></div>
-    <div style="font-size:11px;color:var(--sub);margin-top:12px">✅ 评分与回测结果确定化 (同种子=同结果) — 基于${days}天模拟，日均${allTrades.length>0?(allTrades.length/days).toFixed(0):0}只标的</div>
+    <div class="row"><span class="label">Kelly寤鸿浠撲綅</span><span class="value">${(kelly*100).toFixed(1)}%</span></div>
+    <div class="row"><span class="label">骞冲潎鐩堝埄</span><span class="value red">+${avgWin.toFixed(2)}%</span></div>
+    <div class="row"><span class="label">骞冲潎浜忔崯</span><span class="value green">-${avgLoss.toFixed(2)}%</span></div>
+    <div style="font-size:11px;color:var(--sub);margin-top:12px">鉁?璇勫垎涓庡洖娴嬬粨鏋滅‘瀹氬寲 (鍚岀瀛?鍚岀粨鏋? 鈥?鍩轰簬${days}澶╂ā鎷燂紝鏃ュ潎${allTrades.length>0?(allTrades.length/days).toFixed(0):0}鍙爣鐨?/div>
   `;
 }
 
@@ -843,25 +841,25 @@ async function runBacktest(){
 async function runScreen(useReal){
   const btnR=$('btnReal'),btnM=$('btnMock');
   btnR.disabled=btnM.disabled=true;
-  btnR.innerHTML='<span class="spinner"></span> 加载中...';
-  btnM.innerHTML='<span class="spinner"></span> 加载中...';
+  btnR.innerHTML='<span class="spinner"></span> 鍔犺浇涓?..';
+  btnM.innerHTML='<span class="spinner"></span> 鍔犺浇涓?..';
 
   try{
     let stocks,dataSource;
     if(useReal){
-      toast('正在连接东方财富API...');
+      toast('姝ｅ湪杩炴帴涓滄柟璐㈠瘜API...');
       stocks=await fetchRealStocks();
       if(!stocks||stocks.length<10){
-        toast('⚠️ API获取失败，已回退到模拟数据');
+        toast('鈿狅笍 API鑾峰彇澶辫触锛屽凡鍥為€€鍒版ā鎷熸暟鎹?);
         stocks=generateMockStocks();
-        dataSource='模拟数据 (API不可用)';
+        dataSource='妯℃嫙鏁版嵁 (API涓嶅彲鐢?';
       }else{
-        dataSource=`实时数据 (${stocks.length}只A股)`;
-        toast(`✅ 获取到 ${stocks.length} 只股票实时数据`);
+        dataSource=`瀹炴椂鏁版嵁 (${stocks.length}鍙狝鑲?`;
+        toast(`鉁?鑾峰彇鍒?${stocks.length} 鍙偂绁ㄥ疄鏃舵暟鎹甡);
       }
     }else{
       stocks=generateMockStocks();
-      dataSource=`模拟数据 (${stocks.length}只)`;
+      dataSource=`妯℃嫙鏁版嵁 (${stocks.length}鍙?`;
     }
 
     // Market index
@@ -871,13 +869,13 @@ async function runScreen(useReal){
       if(idx){
         const idxList=Object.values(idx);
         const avgPct=idxList.reduce((s,i)=>s+i.pct_change,0)/idxList.length;
-        if(avgPct>=0.3) marketEnv={status:'good',detail:`大盘向好 (均${avgPct>0?'+':''}${avgPct.toFixed(2)}%)`,avg_pct:avgPct,indices:idx};
-        else if(avgPct>=-0.3) marketEnv={status:'warning',detail:`大盘震荡 (均${avgPct>0?'+':''}${avgPct.toFixed(2)}%)`,avg_pct:avgPct,indices:idx};
-        else marketEnv={status:'bad',detail:`大盘偏弱 (均${avgPct>0?'+':''}${avgPct.toFixed(2)}%)`,avg_pct:avgPct,indices:idx};
+        if(avgPct>=0.3) marketEnv={status:'good',detail:`澶х洏鍚戝ソ (鍧?{avgPct>0?'+':''}${avgPct.toFixed(2)}%)`,avg_pct:avgPct,indices:idx};
+        else if(avgPct>=-0.3) marketEnv={status:'warning',detail:`澶х洏闇囪崱 (鍧?{avgPct>0?'+':''}${avgPct.toFixed(2)}%)`,avg_pct:avgPct,indices:idx};
+        else marketEnv={status:'bad',detail:`澶х洏鍋忓急 (鍧?{avgPct>0?'+':''}${avgPct.toFixed(2)}%)`,avg_pct:avgPct,indices:idx};
         lastMarketEnv=marketEnv;
       }
     }else{
-      marketEnv={status:'good',detail:'大盘向好 (模拟数据)',avg_pct:0.50,indices:{}};
+      marketEnv={status:'good',detail:'澶х洏鍚戝ソ (妯℃嫙鏁版嵁)',avg_pct:0.50,indices:{}};
       lastMarketEnv=marketEnv;
     }
 
@@ -906,7 +904,7 @@ async function runScreen(useReal){
     // Update market env card
     if(marketEnv){
       $('envCard').style.display='';
-      const emoji={good:'✅',warning:'⚠️',bad:'🔴'}[marketEnv.status]||'❓';
+      const emoji={good:'鉁?,warning:'鈿狅笍',bad:'馃敶'}[marketEnv.status]||'鉂?;
       $('envContent').innerHTML=`
         <div style="font-size:24px;text-align:center;margin:8px 0">${emoji} ${marketEnv.detail}</div>
         ${marketEnv.indices&&Object.keys(marketEnv.indices).length>0?`
@@ -922,20 +920,20 @@ async function runScreen(useReal){
     renderResults(final,dataSource);
 
   }catch(e){
-    toast('❌ 运行失败: '+e.message);
+    toast('鉂?杩愯澶辫触: '+e.message);
     console.error(e);
   }finally{
     btnR.disabled=btnM.disabled=false;
-    btnR.innerHTML='🌐 实时数据';
-    btnM.innerHTML='🔧 模拟测试';
-    $('dataHint').textContent=useReal?'实时数据每5秒更新，单次最多获取500只':'模拟数据包含80只典型标的，可离线测试';
+    btnR.innerHTML='馃寪 瀹炴椂鏁版嵁';
+    btnM.innerHTML='馃敡 妯℃嫙娴嬭瘯';
+    $('dataHint').textContent=useReal?'瀹炴椂鏁版嵁姣?绉掓洿鏂帮紝鍗曟鏈€澶氳幏鍙?00鍙?:'妯℃嫙鏁版嵁鍖呭惈80鍙吀鍨嬫爣鐨勶紝鍙绾挎祴璇?;
   }
 }
 
 function renderResults(results,dataSource){
   const area=$('resultsArea');
   if(!results.length){
-    area.innerHTML=`<div class="card"><div style="text-align:center;padding:40px;color:var(--sub)">📭 无符合条件的标的<br><small>来源: ${dataSource}</small></div></div>`;
+    area.innerHTML=`<div class="card"><div style="text-align:center;padding:40px;color:var(--sub)">馃摥 鏃犵鍚堟潯浠剁殑鏍囩殑<br><small>鏉ユ簮: ${dataSource}</small></div></div>`;
     return;
   }
 
@@ -944,20 +942,20 @@ function renderResults(results,dataSource){
 
   area.innerHTML=`
     <div class="card">
-      <div class="card-title">📊 筛选结果 <span style="font-weight:400;font-size:12px;color:var(--sub)">(${dataSource})</span></div>
+      <div class="card-title">馃搳 绛涢€夌粨鏋?<span style="font-weight:400;font-size:12px;color:var(--sub)">(${dataSource})</span></div>
       <div style="font-size:12px;color:var(--sub);margin-bottom:8px">
-        入选 ${results.length} 只 | 行业分布: ${Object.entries(sectorCounts).map(([k,v])=>`${k}(${v})`).join(' · ')}
+        鍏ラ€?${results.length} 鍙?| 琛屼笟鍒嗗竷: ${Object.entries(sectorCounts).map(([k,v])=>`${k}(${v})`).join(' 路 ')}
       </div>
       <div class="tbl-wrap">
         <table>
           <thead>
-            <tr><th>代码</th><th>名称</th><th>涨跌%</th><th>换手%</th><th>市值(亿)</th><th>主力(万)</th><th>量比</th><th>行业</th><th>风险</th><th>总分</th><th>操作</th></tr>
+            <tr><th>浠ｇ爜</th><th>鍚嶇О</th><th>娑ㄨ穼%</th><th>鎹㈡墜%</th><th>甯傚€?浜?</th><th>涓诲姏(涓?</th><th>閲忔瘮</th><th>琛屼笟</th><th>椋庨櫓</th><th>鎬诲垎</th><th>鎿嶄綔</th></tr>
           </thead>
           <tbody>
             ${results.map((r,i)=>{
               const sector=classifySector(r.name);
-              const risk=r.pe<0||r.volume_ratio>5||r.total_score<73?'高':r.total_score<80?'中':'低';
-              const riskBadge=risk==='高'?'badge-red':risk==='中'?'badge-yellow':'badge-green';
+              const risk=r.pe<0||r.volume_ratio>5||r.total_score<73?'楂?:r.total_score<80?'涓?:'浣?;
+              const riskBadge=risk==='楂??'badge-red':risk==='涓??'badge-yellow':'badge-green';
               const fmcB=(r.float_mcap/1e8).toFixed(1);
               const nifW=(r.main_net_inflow/1e4).toFixed(0);
               const scoreBarW=Math.min(100,r.total_score);
@@ -969,7 +967,7 @@ function renderResults(results,dataSource){
                 <td><span class="badge badge-blue">${sector}</span></td>
                 <td><span class="badge ${riskBadge}">${risk}</span></td>
                 <td style="font-weight:700;color:var(--blue)">${r.total_score.toFixed(1)}<span class="score-bar-bg"><span class="score-bar" style="width:${scoreBarW}%"></span></span></td>
-                <td><button class="btn-sm" style="background:var(--blue);font-size:11px;padding:3px 8px" onclick="event.stopPropagation();showDetail('${r.code}')">详情</button></td>
+                <td><button class="btn-sm" style="background:var(--blue);font-size:11px;padding:3px 8px" onclick="event.stopPropagation();showDetail('${r.code}')">璇︽儏</button></td>
               </tr>`;
             }).join('')}
           </tbody>
@@ -978,10 +976,10 @@ function renderResults(results,dataSource){
     </div>
 
     <div class="card">
-      <div class="card-title">📊 评分明细 (Top ${Math.min(5,results.length)})</div>
+      <div class="card-title">馃搳 璇勫垎鏄庣粏 (Top ${Math.min(5,results.length)})</div>
       <div class="tbl-wrap">
         <table style="min-width:600px">
-          <thead><tr><th>名称</th><th>涨跌</th><th>尾盘</th><th>换手</th><th>市值</th><th>资金</th><th>板块</th><th>安全</th><th>大盘</th><th>趋势</th><th>总分</th></tr></thead>
+          <thead><tr><th>鍚嶇О</th><th>娑ㄨ穼</th><th>灏剧洏</th><th>鎹㈡墜</th><th>甯傚€?/th><th>璧勯噾</th><th>鏉垮潡</th><th>瀹夊叏</th><th>澶х洏</th><th>瓒嬪娍</th><th>鎬诲垎</th></tr></thead>
           <tbody>
             ${results.slice(0,5).map(r=>`
               <tr>
@@ -1000,41 +998,41 @@ function renderResults(results,dataSource){
     </div>
 
     <div class="card">
-      <div class="card-title">💰 仓位分配建议</div>
+      <div class="card-title">馃挵 浠撲綅鍒嗛厤寤鸿</div>
       ${(()=>{
         const kelly=calcKellyFraction(0.50,2.0,1.5);
         const mf=lastMarketEnv?{good:1.0,warning:0.8,bad:0.5}[lastMarketEnv.status]||1.0:1.0;
         const rows=results.map((r,i)=>{
-          const pos=calcPositionSize(CFG.TOTAL_CAPITAL,r.price,kelly,r.atr_pct||3.0,mf,r.pe<0||r.volume_ratio>5||r.total_score<73?'高':r.total_score<80?'中':'低');
-          return {...pos,name:r.name,code:r.code,risk:r.pe<0||r.volume_ratio>5||r.total_score<73?'高':r.total_score<80?'中':'低'};
+          const pos=calcPositionSize(CFG.TOTAL_CAPITAL,r.price,kelly,r.atr_pct||3.0,mf,r.pe<0||r.volume_ratio>5||r.total_score<73?'楂?:r.total_score<80?'涓?:'浣?);
+          return {...pos,name:r.name,code:r.code,risk:r.pe<0||r.volume_ratio>5||r.total_score<73?'楂?:r.total_score<80?'涓?:'浣?};
         });
         const totalAmt=rows.reduce((s,r)=>s+r.amount,0);
         return `
           <div style="font-size:12px;color:var(--sub);margin-bottom:8px">
-            Kelly仓位: ${(kelly*100).toFixed(1)}% | 资金: ¥${CFG.TOTAL_CAPITAL.toLocaleString()} | 大盘系数: ${mf.toFixed(1)}
+            Kelly浠撲綅: ${(kelly*100).toFixed(1)}% | 璧勯噾: 楼${CFG.TOTAL_CAPITAL.toLocaleString()} | 澶х洏绯绘暟: ${mf.toFixed(1)}
           </div>
           <div class="tbl-wrap"><table style="min-width:500px">
-            <thead><tr><th>股票</th><th>风险</th><th>建议股数</th><th>金额</th><th>占比</th></tr></thead>
+            <thead><tr><th>鑲＄エ</th><th>椋庨櫓</th><th>寤鸿鑲℃暟</th><th>閲戦</th><th>鍗犳瘮</th></tr></thead>
             <tbody>
               ${rows.map(r=>`<tr>
                 <td style="font-weight:600">${r.name}</td>
-                <td><span class="badge ${r.risk==='高'?'badge-red':r.risk==='中'?'badge-yellow':'badge-green'}">${r.risk}</span></td>
-                <td>${r.shares}股</td><td>¥${r.amount.toLocaleString()}</td>
+                <td><span class="badge ${r.risk==='楂??'badge-red':r.risk==='涓??'badge-yellow':'badge-green'}">${r.risk}</span></td>
+                <td>${r.shares}鑲?/td><td>楼${r.amount.toLocaleString()}</td>
                 <td style="font-weight:600">${r.pct.toFixed(1)}%</td>
               </tr>`).join('')}
             </tbody>
           </table></div>
           <div style="margin-top:8px;font-size:13px">
-            📌 总建议仓位: <strong>${totalAmt.toLocaleString()}元 (${(totalAmt/CFG.TOTAL_CAPITAL*100).toFixed(1)}%)</strong>
-            ${totalAmt>CFG.TOTAL_CAPITAL*0.7?`<span style="color:var(--red)"> ⚠️ 超过70%，建议只选Top3</span>`:''}
+            馃搶 鎬诲缓璁粨浣? <strong>${totalAmt.toLocaleString()}鍏?(${(totalAmt/CFG.TOTAL_CAPITAL*100).toFixed(1)}%)</strong>
+            ${totalAmt>CFG.TOTAL_CAPITAL*0.7?`<span style="color:var(--red)"> 鈿狅笍 瓒呰繃70%锛屽缓璁彧閫塗op3</span>`:''}
           </div>
         `;
       })()}
     </div>
 
     <div style="text-align:center;padding:8px">
-      <button class="btn btn-outline" onclick="exportCSV()" style="display:inline;width:auto;margin:4px">📥 导出CSV</button>
-      <button class="btn btn-outline" onclick="switchTab('sell')" style="display:inline;width:auto;margin:4px">📋 查看卖出策略</button>
+      <button class="btn btn-outline" onclick="exportCSV()" style="display:inline;width:auto;margin:4px">馃摜 瀵煎嚭CSV</button>
+      <button class="btn btn-outline" onclick="switchTab('sell')" style="display:inline;width:auto;margin:4px">馃搵 鏌ョ湅鍗栧嚭绛栫暐</button>
     </div>
   `;
 }
@@ -1045,37 +1043,35 @@ function renderResults(results,dataSource){
 function renderSellPlans(){
   const content=$('sellContent');
   if(!lastResults.length){
-    content.innerHTML='<div style="text-align:center;padding:40px;color:var(--sub)">暂无数据，请先在「筛选」页运行一次 ⬆️</div>';
+    content.innerHTML='<div style="text-align:center;padding:40px;color:var(--sub)">鏆傛棤鏁版嵁锛岃鍏堝湪銆岀瓫閫夈€嶉〉杩愯涓€娆?猬嗭笍</div>';
     return;
   }
 
   content.innerHTML=`
     <div style="font-size:13px;color:var(--sub);margin-bottom:8px">
-      ${lastResults.length} 只标的 · 一夜持股核心：次日必须卖出！
-    </div>
+      ${lastResults.length} 鍙爣鐨?路 涓€澶滄寔鑲℃牳蹇冿細娆℃棩蹇呴』鍗栧嚭锛?    </div>
     ${lastResults.map((r,i)=>{
       const plan=lastSellPlans[r.code]||generateSellPlan(r,lastMarketEnv);
-      const riskEmoji={低:'🟢',中:'🟡',高:'🔴'}[plan.risk_level]||'🟡';
-      const cardClass=plan.risk_level==='高'?'danger':plan.risk_level==='中'?'warn':'';
+      const riskEmoji={浣?'馃煝',涓?'馃煛',楂?'馃敶'}[plan.risk_level]||'馃煛';
+      const cardClass=plan.risk_level==='楂??'danger':plan.risk_level==='涓??'warn':'';
       return `
         <div class="plan-card ${cardClass}">
           <div style="font-weight:600;font-size:14px">${i+1}. ${riskEmoji} ${plan.name} <span style="font-weight:400;font-size:12px;color:var(--sub)">${plan.code}</span></div>
           <div style="margin-top:4px;display:grid;grid-template-columns:1fr 1fr;gap:4px;font-size:12px">
-            <div>入场: <strong>¥${plan.entry_price.toFixed(2)}</strong></div>
-            <div>信心: <strong>${plan.confidence}</strong></div>
-            <div>🎯止盈: <strong class="red">¥${plan.target_price} (+${plan.target_profit_pct}%)</strong></div>
-            <div>🛑止损: <strong class="green">¥${plan.stop_loss_price} (${plan.stop_loss_pct}%)</strong></div>
-            <div>⏰最晚: <strong>${plan.time_limit}</strong></div>
-            <div>止损方法: <strong>${plan.stop_method||'固定'}</strong></div>
+            <div>鍏ュ満: <strong>楼${plan.entry_price.toFixed(2)}</strong></div>
+            <div>淇″績: <strong>${plan.confidence}</strong></div>
+            <div>馃幆姝㈢泩: <strong class="red">楼${plan.target_price} (+${plan.target_profit_pct}%)</strong></div>
+            <div>馃洃姝㈡崯: <strong class="green">楼${plan.stop_loss_price} (${plan.stop_loss_pct}%)</strong></div>
+            <div>鈴版渶鏅? <strong>${plan.time_limit}</strong></div>
+            <div>姝㈡崯鏂规硶: <strong>${plan.stop_method||'鍥哄畾'}</strong></div>
           </div>
           ${plan.market_note?`<div style="font-size:11px;color:var(--red);margin-top:4px">${plan.market_note}</div>`:''}
-          ${plan.atr_stop?`<div style="font-size:11px;color:var(--sub);margin-top:2px">ATR动态止损: ¥${plan.atr_stop} | ATR止盈: ¥${plan.atr_target}</div>`:''}
+          ${plan.atr_stop?`<div style="font-size:11px;color:var(--sub);margin-top:2px">ATR鍔ㄦ€佹鎹? 楼${plan.atr_stop} | ATR姝㈢泩: 楼${plan.atr_target}</div>`:''}
         </div>
       `;
     }).join('')}
     <div class="warn-box" style="margin-top:12px">
-      ⚠️ <strong>纪律提醒：</strong>一夜持股法的核心是「一夜」——次日开盘必须清仓，无论盈亏。严守止损线，不贪婪、不侥幸。
-    </div>
+      鈿狅笍 <strong>绾緥鎻愰啋锛?/strong>涓€澶滄寔鑲℃硶鐨勬牳蹇冩槸銆屼竴澶溿€嶁€斺€旀鏃ュ紑鐩樺繀椤绘竻浠擄紝鏃犺鐩堜簭銆備弗瀹堟鎹熺嚎锛屼笉璐┆銆佷笉渚ュ垢銆?    </div>
   `;
 }
 
@@ -1089,38 +1085,38 @@ function showDetail(code){
   const sector=classifySector(stock.name);
 
   $('modalContent').innerHTML=`
-    <h3>📊 ${stock.name} (${stock.code}) <span class="badge badge-blue">${sector}</span></h3>
+    <h3>馃搳 ${stock.name} (${stock.code}) <span class="badge badge-blue">${sector}</span></h3>
     <div class="info-grid">
-      <div class="info-item"><div class="info-label">价格</div><div class="info-num" style="font-size:16px">¥${stock.price.toFixed(2)}</div></div>
-      <div class="info-item"><div class="info-label">涨跌幅</div><div class="info-num ${stock.pct_change>0?'red':'green'}" style="font-size:16px">${stock.pct_change>0?'+':''}${stock.pct_change.toFixed(2)}%</div></div>
-      <div class="info-item"><div class="info-label">换手率</div><div class="info-num">${stock.turnover.toFixed(2)}%</div></div>
-      <div class="info-item"><div class="info-label">量比</div><div class="info-num">${stock.volume_ratio.toFixed(2)}</div></div>
-      <div class="info-item"><div class="info-label">流通市值</div><div class="info-num">${(stock.float_mcap/1e8).toFixed(1)}亿</div></div>
+      <div class="info-item"><div class="info-label">浠锋牸</div><div class="info-num" style="font-size:16px">楼${stock.price.toFixed(2)}</div></div>
+      <div class="info-item"><div class="info-label">娑ㄨ穼骞?/div><div class="info-num ${stock.pct_change>0?'red':'green'}" style="font-size:16px">${stock.pct_change>0?'+':''}${stock.pct_change.toFixed(2)}%</div></div>
+      <div class="info-item"><div class="info-label">鎹㈡墜鐜?/div><div class="info-num">${stock.turnover.toFixed(2)}%</div></div>
+      <div class="info-item"><div class="info-label">閲忔瘮</div><div class="info-num">${stock.volume_ratio.toFixed(2)}</div></div>
+      <div class="info-item"><div class="info-label">娴侀€氬競鍊?/div><div class="info-num">${(stock.float_mcap/1e8).toFixed(1)}浜?/div></div>
       <div class="info-item"><div class="info-label">PE</div><div class="info-num">${stock.pe?stock.pe.toFixed(1):'-'}</div></div>
-      <div class="info-item"><div class="info-label">主力净流入</div><div class="info-num">${(stock.main_net_inflow/1e4).toFixed(0)}万</div></div>
-      <div class="info-item"><div class="info-label">总分</div><div class="info-num" style="color:var(--blue);font-size:20px">${stock.total_score.toFixed(1)}</div></div>
+      <div class="info-item"><div class="info-label">涓诲姏鍑€娴佸叆</div><div class="info-num">${(stock.main_net_inflow/1e4).toFixed(0)}涓?/div></div>
+      <div class="info-item"><div class="info-label">鎬诲垎</div><div class="info-num" style="color:var(--blue);font-size:20px">${stock.total_score.toFixed(1)}</div></div>
     </div>
     <div style="margin-top:16px">
-      <div class="card-title">📊 评分明细</div>
-      <div class="row"><span class="label">涨跌幅 (15pts)</span><span class="value">${stock.score_pct_change||0}</span></div>
-      <div class="row"><span class="label">尾盘信号 (20pts)</span><span class="value">${stock.score_tail_signal||0} <span style="font-size:11px">(${stock.tail_pattern||'N/A'})</span></span></div>
-      <div class="row"><span class="label">换手率 (10pts)</span><span class="value">${stock.score_turnover||0}</span></div>
-      <div class="row"><span class="label">流通市值 (8pts)</span><span class="value">${stock.score_float_mcap||0}</span></div>
-      <div class="row"><span class="label">资金流向 (12pts)</span><span class="value">${stock.score_fund_flow||0}</span></div>
-      <div class="row"><span class="label">板块排名 (8pts)</span><span class="value">${stock.score_sector_rank||0}</span></div>
-      <div class="row"><span class="label">安全过滤 (7pts)</span><span class="value">${stock.score_safety_filter||0}</span></div>
-      <div class="row"><span class="label">大盘环境 (10pts)</span><span class="value">${stock.score_market_env||0}</span></div>
-      <div class="row"><span class="label">趋势位置 (10pts)</span><span class="value">${stock.score_trend_position||0} <span style="font-size:11px">(MA${stock.trend_ma||'?'})</span></span></div>
+      <div class="card-title">馃搳 璇勫垎鏄庣粏</div>
+      <div class="row"><span class="label">娑ㄨ穼骞?(15pts)</span><span class="value">${stock.score_pct_change||0}</span></div>
+      <div class="row"><span class="label">灏剧洏淇″彿 (20pts)</span><span class="value">${stock.score_tail_signal||0} <span style="font-size:11px">(${stock.tail_pattern||'N/A'})</span></span></div>
+      <div class="row"><span class="label">鎹㈡墜鐜?(10pts)</span><span class="value">${stock.score_turnover||0}</span></div>
+      <div class="row"><span class="label">娴侀€氬競鍊?(8pts)</span><span class="value">${stock.score_float_mcap||0}</span></div>
+      <div class="row"><span class="label">璧勯噾娴佸悜 (12pts)</span><span class="value">${stock.score_fund_flow||0}</span></div>
+      <div class="row"><span class="label">鏉垮潡鎺掑悕 (8pts)</span><span class="value">${stock.score_sector_rank||0}</span></div>
+      <div class="row"><span class="label">瀹夊叏杩囨护 (7pts)</span><span class="value">${stock.score_safety_filter||0}</span></div>
+      <div class="row"><span class="label">澶х洏鐜 (10pts)</span><span class="value">${stock.score_market_env||0}</span></div>
+      <div class="row"><span class="label">瓒嬪娍浣嶇疆 (10pts)</span><span class="value">${stock.score_trend_position||0} <span style="font-size:11px">(MA${stock.trend_ma||'?'})</span></span></div>
     </div>
     <div style="margin-top:16px">
-      <div class="card-title">📋 卖出策略</div>
-      <div class="row"><span class="label">入场价</span><span class="value">¥${plan.entry_price.toFixed(2)}</span></div>
-      <div class="row"><span class="label">🎯止盈</span><span class="value red">¥${plan.target_price} (+${plan.target_profit_pct}%)</span></div>
-      <div class="row"><span class="label">🛑止损</span><span class="value green">¥${plan.stop_loss_price} (${plan.stop_loss_pct}%)</span></div>
-      <div class="row"><span class="label">⏰最晚清仓</span><span class="value">${plan.time_limit}</span></div>
-      <div class="row"><span class="label">风险等级</span><span class="value">${plan.risk_level}</span></div>
+      <div class="card-title">馃搵 鍗栧嚭绛栫暐</div>
+      <div class="row"><span class="label">鍏ュ満浠?/span><span class="value">楼${plan.entry_price.toFixed(2)}</span></div>
+      <div class="row"><span class="label">馃幆姝㈢泩</span><span class="value red">楼${plan.target_price} (+${plan.target_profit_pct}%)</span></div>
+      <div class="row"><span class="label">馃洃姝㈡崯</span><span class="value green">楼${plan.stop_loss_price} (${plan.stop_loss_pct}%)</span></div>
+      <div class="row"><span class="label">鈴版渶鏅氭竻浠?/span><span class="value">${plan.time_limit}</span></div>
+      <div class="row"><span class="label">椋庨櫓绛夌骇</span><span class="value">${plan.risk_level}</span></div>
     </div>
-    <button class="btn btn-primary" onclick="closeModal()" style="margin-top:16px">关闭</button>
+    <button class="btn btn-primary" onclick="closeModal()" style="margin-top:16px">鍏抽棴</button>
   `;
   $('modal').style.display='flex';
 }
@@ -1134,8 +1130,8 @@ function closeModal(e){
 // EXPORT
 // ============================================================
 function exportCSV(){
-  if(!lastResults.length){toast('无数据可导出');return}
-  const headers=['代码','名称','涨跌幅%','换手率%','流通市值(亿)','主力净流入(万)','量比','PE','总分','行业','尾盘形态','止盈价','止损价','最晚清仓'];
+  if(!lastResults.length){toast('鏃犳暟鎹彲瀵煎嚭');return}
+  const headers=['浠ｇ爜','鍚嶇О','娑ㄨ穼骞?','鎹㈡墜鐜?','娴侀€氬競鍊?浜?','涓诲姏鍑€娴佸叆(涓?','閲忔瘮','PE','鎬诲垎','琛屼笟','灏剧洏褰㈡€?,'姝㈢泩浠?,'姝㈡崯浠?,'鏈€鏅氭竻浠?];
   const rows=lastResults.map(r=>{
     const plan=lastSellPlans[r.code]||{};
     return [
@@ -1145,13 +1141,13 @@ function exportCSV(){
       plan.target_price||'',plan.stop_loss_price||'',plan.time_limit||''
     ].join(',');
   });
-  const csv='﻿'+headers.join(',')+'\n'+rows.join('\n');
+  const csv='锘?+headers.join(',')+'\n'+rows.join('\n');
   const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
   const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');a.href=url;a.download='一夜持股法_筛选结果.csv';
+  const a=document.createElement('a');a.href=url;a.download='涓€澶滄寔鑲℃硶_绛涢€夌粨鏋?csv';
   document.body.appendChild(a);a.click();document.body.removeChild(a);
   URL.revokeObjectURL(url);
-  toast('✅ CSV已下载');
+  toast('鉁?CSV宸蹭笅杞?);
 }
 
 // ============================================================
@@ -1177,7 +1173,7 @@ function init(){
   if(localStorage.getItem('overnight_dark')==='1'){isDark=true;document.body.classList.add('dark')}
   // Header time
   const now=new Date();
-  $('headerTime').textContent=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')} · 交易日${[0,6].includes(now.getDay())?'（周末休市）':''}`;
+  $('headerTime').textContent=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')} 路 浜ゆ槗鏃?{[0,6].includes(now.getDay())?'锛堝懆鏈紤甯傦級':''}`;
 
   // Auto-run with mock on load
   setTimeout(()=>runScreen(false),500);

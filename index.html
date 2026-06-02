@@ -376,17 +376,12 @@ function generateBacktestStocks(baseStocks,dayOffset){
 // REAL DATA (EAST MONEY API)
 // ============================================================
 async function fetchRealStocks(){
-  // East Money API: A-share market data
-  // Fields: f2=price, f3=pct_change, f4=change, f5=volume, f6=amount, f7=amplitude
-  // f8=turnover_rate, f9=PE(dynamic), f10=volume_ratio, f12=code, f14=name
-  // f15=high, f16=low, f17=open, f18=prev_close, f20=market_cap, f21=float_mcap
-  // f23=PB, f62=main_net_inflow, f115=PE(static)
-  const PAGE_SIZE=500;
+  const PZ=500;
   const fields='f2,f3,f4,f5,f6,f7,f8,f9,f10,f12,f14,f15,f16,f17,f18,f20,f21,f23,f62,f115';
-  const fs='m:0+t:6,m:0+t:23,m:0+t:7,m:1+t:2,m:1+t:80,m:1+t:23';
-  const base=`https://push2.eastmoney.com/api/qt/clist/get?po=1&np=1&fltt=2&invt=2&fid=f3&fs=${encodeURIComponent(fs)}&fields=${fields}&ut=bd1d9ddb04089700cf9c27f6f7426281`;
+  const fs='m:0+t:6,m:0+t:80,m:1+t:2,m:1+t:23';
+  const base=`https://push2.eastmoney.com/api/qt/clist/get?pn=1&pz=${PZ}&po=1&np=1&fltt=2&invt=2&fid=f3&fs=${encodeURIComponent(fs)}&fields=${fields}&ut=bd1d9ddb04089700cf9c27f6f7426281`;
 
-  const parsePage=(items)=>{
+  function parse(items){
     return items.filter(item=>{
       const name=item.f14||'';
       if(name.includes('ST')||name.includes('*ST')||name.includes('退')) return false;
@@ -410,29 +405,27 @@ async function fetchRealStocks(){
       low:parseFloat(item.f16||0),
       open:parseFloat(item.f17||0),
     }));
-  };
+  }
 
   try{
-    // Page 1
-    const r1=await fetch(`${base}&pn=1&pz=${PAGE_SIZE}`,{headers:{'Accept':'application/json'}});
+    const r1=await fetch(base,{headers:{'Accept':'application/json'}});
     if(!r1.ok) throw new Error(`HTTP ${r1.status}`);
     const j1=await r1.json();
     if(!j1.data||!j1.data.diff) throw new Error('API响应格式异常');
     const total=j1.data.total||0;
-    let all=parsePage(j1.data.diff||[]);
+    let all=parse(j1.data.diff||[]);
 
-    // Paginate if needed
-    if(total>PAGE_SIZE){
-      const pages=Math.ceil(total/PAGE_SIZE);
-      const reqs=[];
+    if(total>PZ){
+      const pages=Math.ceil(total/PZ);
+      const extra=[];
       for(let p=2;p<=pages;p++){
-        reqs.push(fetch(`${base}&pn=${p}&pz=${PAGE_SIZE}`,{headers:{'Accept':'application/json'}})
-          .then(r=>r.json())
-          .then(j=>j.data&&j.data.diff?parsePage(j.data.diff):[])
-          .catch(()=>[]));
+        const url=base.replace(`pn=1`,`pn=${p}`);
+        try{
+          const r=await fetch(url,{headers:{'Accept':'application/json'}});
+          if(r.ok){const j=await r.json();if(j.data&&j.data.diff) extra.push(...parse(j.data.diff));}
+        }catch(e){/* skip failed page */}
       }
-      const rest=await Promise.all(reqs);
-      all=all.concat(...rest);
+      all=all.concat(extra);
     }
     return all;
   }catch(e){

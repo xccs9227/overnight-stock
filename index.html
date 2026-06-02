@@ -382,8 +382,8 @@ async function fetchRealStocks(){
   // f15=high, f16=low, f17=open, f18=prev_close, f20=market_cap, f21=float_mcap
   // f23=PB, f62=main_net_inflow, f115=PE(static)
   const fields='f2,f3,f4,f5,f6,f7,f8,f9,f10,f12,f14,f15,f16,f17,f18,f20,f21,f23,f62,f115';
-  const fs='m:0+t:6,m:0+t:80,m:1+t:2,m:1+t:23';  // All A-shares
-  const url=`https://push2.eastmoney.com/api/qt/clist/get?pn=1&pz=500&po=1&np=1&fltt=2&invt=2&fid=f3&fs=${encodeURIComponent(fs)}&fields=${fields}&ut=bd1d9ddb04089700cf9c27f6f7426281`;
+  const fs='m:0+t:6,m:0+t:23,m:0+t:7,m:1+t:2,m:1+t:80,m:1+t:23';  // All A-shares (沪主板+科创板+沪B+创业板+深主板+深中小)
+  const url=`https://push2.eastmoney.com/api/qt/clist/get?pn=1&pz=6000&po=1&np=1&fltt=2&invt=2&fid=f3&fs=${encodeURIComponent(fs)}&fields=${fields}&ut=bd1d9ddb04089700cf9c27f6f7426281`;
 
   try{
     const resp=await fetch(url,{headers:{'Accept':'application/json'}});

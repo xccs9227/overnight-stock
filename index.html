@@ -200,6 +200,18 @@ function toast(msg){const t=$('toast');t.textContent=msg;t.classList.add('show')
 function fmtM(v){return v>=1e8?(v/1e8).toFixed(1)+'亿':v>=1e4?(v/1e4).toFixed(0)+'万':v.toFixed(0)}
 function fmtPct(v){return(v>=0?'+':'')+v.toFixed(2)+'%'}
 async function decodeGBK(resp){try{const buf=await resp.arrayBuffer();for(const enc of['gb18030','gbk','gb2312']){try{return new TextDecoder(enc).decode(buf)}catch(e){}}return new TextDecoder('utf-8').decode(buf)}catch(e){return resp.text()}}
+function fetchJSONP(url,cbParam,timeout){
+  return new Promise((resolve,reject)=>{
+    const name='_jp'+Date.now()+'_'+Math.floor(Math.random()*99999);
+    const script=document.createElement('script');
+    const timer=setTimeout(()=>{cleanup();reject(new Error('timeout'))},timeout||15000);
+    function cleanup(){clearTimeout(timer);delete window[name];if(script.parentNode)script.parentNode.removeChild(script)}
+    window[name]=function(data){cleanup();resolve(data)};
+    script.src=url+(url.includes('?')?'&':'?')+(cbParam||'cb')+'='+name;
+    script.onerror=function(){cleanup();reject(new Error('script error'))};
+    document.head.appendChild(script);
+  });
+}
 function fmtNum(v,d=2){return v.toFixed(d)}
 function classifySector(name){
   for(const[sector,kws]of Object.entries(CFG.SECTOR_KEYWORDS))
@@ -373,7 +385,7 @@ function generateBacktestStocks(baseStocks,dayOffset){
 }
 
 // ============================================================
-// REAL DATA (EAST MONEY API)
+// REAL DATA (EAST MONEY API — JSONP primary, fetch fallback)
 // ============================================================
 async function fetchRealStocks(){
   const fields='f2,f3,f4,f5,f6,f7,f8,f9,f10,f12,f14,f15,f16,f17,f18,f20,f21,f23,f62,f115';
@@ -409,12 +421,19 @@ async function fetchRealStocks(){
     }));
   }
 
+  // Fetch one page — try JSONP first (bypasses CORS), fall back to fetch
+  async function fetchPage(pn,pz){
+    const url=makeUrl(pn,pz);
+    // JSONP: uses <script> tag, not subject to CORS
+    try{const data=await fetchJSONP(url,'cb',10000);if(data&&data.data&&data.data.diff)return data}catch(e){}
+    // Fetch fallback (works from local server, may fail from github.io due to CORS)
+    try{const r=await fetch(url,{headers:{'Accept':'application/json'}});if(!r.ok)return null;return await r.json()}catch(e){return null}
+  }
+
   try{
     const PAGE_SIZE=500;
-    const r1=await fetch(makeUrl(1,PAGE_SIZE),{headers:{'Accept':'application/json'}});
-    if(!r1.ok) throw new Error('HTTP '+r1.status);
-    const j1=await r1.json();
-    if(!j1.data||!j1.data.diff) throw new Error('API响应格式异常');
+    const j1=await fetchPage(1,PAGE_SIZE);
+    if(!j1||!j1.data||!j1.data.diff) throw new Error('API响应格式异常');
 
     const total=j1.data.total||0;
     let all=itemsToStocks(j1.data.diff);
@@ -422,12 +441,9 @@ async function fetchRealStocks(){
     if(total>PAGE_SIZE){
       const pages=Math.ceil(total/PAGE_SIZE);
       for(let p=2;p<=pages;p++){
-        try{
-          const r=await fetch(makeUrl(p,PAGE_SIZE),{headers:{'Accept':'application/json'}});
-          if(!r.ok) break;
-          const j=await r.json();
-          if(j.data&&j.data.diff) all=all.concat(itemsToStocks(j.data.diff));
-        }catch(e){break}
+        const j=await fetchPage(p,PAGE_SIZE);
+        if(!j||!j.data||!j.data.diff) break;
+        all=all.concat(itemsToStocks(j.data.diff));
       }
     }
     return all;

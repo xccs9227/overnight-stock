@@ -451,8 +451,13 @@ async function fetchRealStocks(){
   }
 
   try{
-    var PAGE_SIZE=500;
+    // Try larger page size first, fall back to 500 if API rejects
+    var PAGE_SIZE=1000;
     var j1=await fetchPage(1,PAGE_SIZE);
+    if(!j1||!j1.data||!j1.data.diff||(j1.data.diff||[]).length<10){
+      PAGE_SIZE=500;
+      j1=await fetchPage(1,PAGE_SIZE);
+    }
     if(!j1||!j1.data||!j1.data.diff) throw new Error('API响应格式异常');
 
     var total=j1.data.total||0;
@@ -461,9 +466,18 @@ async function fetchRealStocks(){
     if(total>PAGE_SIZE){
       var pages=Math.ceil(total/PAGE_SIZE);
       for(var p=2;p<=pages;p++){
+        // Delay between pages to avoid rate limiting (800ms after page 2)
+        if(p>2) await new Promise(function(r){setTimeout(r,800)});
         var j=await fetchPage(p,PAGE_SIZE);
-        if(!j||!j.data||!j.data.diff) break;
+        if(!j||!j.data||!j.data.diff){
+          // Retry once after a longer pause (1.5s)
+          await new Promise(function(r){setTimeout(r,1500)});
+          j=await fetchPage(p,PAGE_SIZE);
+        }
+        if(!j||!j.data||!j.data.diff) continue; // skip failed page, don't break
         all=all.concat(itemsToStocks(j.data.diff));
+        var btnR=document.getElementById('btnReal');
+        if(btnR) btnR.innerHTML='<span class="spinner"></span> 加载 '+p+'/'+pages+' 页';
       }
     }
     return all;

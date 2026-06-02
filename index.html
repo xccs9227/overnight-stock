@@ -376,12 +376,14 @@ function generateBacktestStocks(baseStocks,dayOffset){
 // REAL DATA (EAST MONEY API)
 // ============================================================
 async function fetchRealStocks(){
-  const PZ=500;
   const fields='f2,f3,f4,f5,f6,f7,f8,f9,f10,f12,f14,f15,f16,f17,f18,f20,f21,f23,f62,f115';
   const fs='m:0+t:6,m:0+t:80,m:1+t:2,m:1+t:23';
-  const base=`https://push2.eastmoney.com/api/qt/clist/get?pn=1&pz=${PZ}&po=1&np=1&fltt=2&invt=2&fid=f3&fs=${encodeURIComponent(fs)}&fields=${fields}&ut=bd1d9ddb04089700cf9c27f6f7426281`;
 
-  function parse(items){
+  function makeUrl(pn,pz){
+    return `https://push2.eastmoney.com/api/qt/clist/get?pn=${pn}&pz=${pz}&po=1&np=1&fltt=2&invt=2&fid=f3&fs=${encodeURIComponent(fs)}&fields=${fields}&ut=bd1d9ddb04089700cf9c27f6f7426281`;
+  }
+
+  function itemsToStocks(items){
     return items.filter(item=>{
       const name=item.f14||'';
       if(name.includes('ST')||name.includes('*ST')||name.includes('退')) return false;
@@ -408,24 +410,23 @@ async function fetchRealStocks(){
   }
 
   try{
-    const r1=await fetch(base,{headers:{'Accept':'application/json'}});
+    // Page 1 — same URL as original
+    const r1=await fetch(makeUrl(1,500),{headers:{'Accept':'application/json'}});
     if(!r1.ok) throw new Error(`HTTP ${r1.status}`);
     const j1=await r1.json();
     if(!j1.data||!j1.data.diff) throw new Error('API响应格式异常');
     const total=j1.data.total||0;
-    let all=parse(j1.data.diff||[]);
+    let all=itemsToStocks(j1.data.diff||[]);
 
-    if(total>PZ){
-      const pages=Math.ceil(total/PZ);
-      const extra=[];
-      for(let p=2;p<=pages;p++){
-        const url=base.replace(`pn=1`,`pn=${p}`);
-        try{
-          const r=await fetch(url,{headers:{'Accept':'application/json'}});
-          if(r.ok){const j=await r.json();if(j.data&&j.data.diff) extra.push(...parse(j.data.diff));}
-        }catch(e){/* skip failed page */}
-      }
-      all=all.concat(extra);
+    // If more pages available, fetch them too
+    const pages=Math.ceil(total/500);
+    for(let p=2;p<=pages;p++){
+      try{
+        const r=await fetch(makeUrl(p,500),{headers:{'Accept':'application/json'}});
+        if(!r.ok) continue;
+        const j=await r.json();
+        if(j.data&&j.data.diff) all=all.concat(itemsToStocks(j.data.diff));
+      }catch(e){/* skip failed page */}
     }
     return all;
   }catch(e){

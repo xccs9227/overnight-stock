@@ -195,7 +195,7 @@ function $(id){return document.getElementById(id)}
 function toast(msg){const t=$('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2000)}
 function fmtM(v){return v>=1e8?(v/1e8).toFixed(1)+'浜?:v>=1e4?(v/1e4).toFixed(0)+'涓?:v.toFixed(0)}
 function fmtPct(v){return(v>=0?'+':'')+v.toFixed(2)+'%'}
-async function decodeGBK(resp){try{const buf=await resp.arrayBuffer();return new TextDecoder('gbk').decode(buf)}catch(e){return resp.text()}}
+async function decodeGBK(resp){try{const buf=await resp.arrayBuffer();for(const enc of['gb18030','gbk','gb2312']){try{return new TextDecoder(enc).decode(buf)}catch(e){}}return new TextDecoder('utf-8').decode(buf)}catch(e){return resp.text()}}
 function fmtNum(v,d=2){return v.toFixed(d)}
 function classifySector(name){
   for(const[sector,kws]of Object.entries(CFG.SECTOR_KEYWORDS))
@@ -375,13 +375,15 @@ async function fetchRealStocks(){
   // East Money API: A-share market data
   const fields='f2,f3,f4,f5,f6,f7,f8,f9,f10,f12,f14,f15,f16,f17,f18,f20,f21,f23,f62,f115';
   const fs='m:0+t:6,m:0+t:80,m:1+t:2,m:1+t:23';
+  const url=`https://push2.eastmoney.com/api/qt/clist/get?pn=1&pz=500&po=1&np=1&fltt=2&invt=2&fid=f3&fs=${encodeURIComponent(fs)}&fields=${fields}&ut=bd1d9ddb04089700cf9c27f6f7426281`;
 
-  function makeUrl(pz){
-    return `https://push2.eastmoney.com/api/qt/clist/get?pn=1&pz=${pz}&po=1&np=1&fltt=2&invt=2&fid=f3&fs=${encodeURIComponent(fs)}&fields=${fields}&ut=bd1d9ddb04089700cf9c27f6f7426281`;
-  }
+  try{
+    const resp=await fetch(url,{headers:{'Accept':'application/json'}});
+    if(!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const json=await resp.json();
+    if(!json.data||!json.data.diff) throw new Error('API鍝嶅簲鏍煎紡寮傚父');
 
-  function itemsToStocks(items){
-    return items.filter(item=>{
+    return json.data.diff.filter(item=>{
       const name=item.f14||'';
       if(name.includes('ST')||name.includes('*ST')||name.includes('閫€')) return false;
       if(item.f3===null||item.f3===undefined) return false;
@@ -404,33 +406,10 @@ async function fetchRealStocks(){
       low:parseFloat(item.f16||0),
       open:parseFloat(item.f17||0),
     }));
+  }catch(e){
+    console.error('API璇锋眰澶辫触:',e);
+    return null;
   }
-
-  // Try progressively smaller page sizes until one works
-  // pz=5000 鈫?all stocks in 1 call. If API rejects, fall back to pz=500.
-  const pageSizes=[5000,2000,1000,500];
-  let lastError=null;
-
-  for(const pz of pageSizes){
-    try{
-      const url=makeUrl(pz);
-      const resp=await fetch(url,{headers:{'Accept':'application/json'}});
-      if(!resp.ok) throw new Error(`HTTP ${resp.status}`);
-      const json=await resp.json();
-      if(!json.data||!json.data.diff) throw new Error('鍝嶅簲鏃犳暟鎹?);
-      const total=json.data.total||0;
-      const stocks=itemsToStocks(json.data.diff||[]);
-      console.log(`fetchRealStocks: pz=${pz} success, got ${stocks.length} stocks (total=${total})`);
-      return stocks;
-    }catch(e){
-      lastError=e;
-      console.warn(`fetchRealStocks: pz=${pz} failed:`,e.message);
-      // continue to next smaller pz
-    }
-  }
-
-  console.error('fetchRealStocks: all page sizes failed. Last error:',lastError?.message);
-  return null;
 }
 
 async function fetchMarketIndex(){
